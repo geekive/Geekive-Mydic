@@ -1,11 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.geekive.geekiveMydic.mapper.VocabularyMapper">	
+<mapper namespace="com.geekive.geekiveMydic.mapper.VocabularyMapper">
+	<select id="selectVocabularyList" resultType="geekiveMap">
+		/* vocabularyMapper.selectVocabularyList */
+		SELECT
+		   	VOCABULARY_UID									AS vocabularyUid
+		    , ENGLISH										AS english
+		    , KOREAN										AS korean
+		    , EXAMPLE										AS example
+		    , SOURCE										AS source
+		    , DATE_FORMAT(REGISTRATION_DATE, '%Y. %m. %d')	AS registrationDate
+		FROM
+			VOCABULARY
+		WHERE
+			USER_UID = #{userUid}
+		ORDER BY
+			REGISTRATION_DATE DESC
+	</select>
+	
+	<select id="selectSourceList" resultType="geekiveMap">
+		/* vocabularyMapper.selectSourceList */
+		SELECT
+			DISTINCT SOURCE			AS source
+		FROM
+			VOCABULARY
+		WHERE
+			USER_UID = #{userUid}
+		ORDER BY
+			SOURCE ASC
+	</select>
+
 	<insert id="insertVocabulary">
 		/* vocabularyMapper.insertVocabulary */
-		INSERT INTO vocabulary (
-		      VOCABULARY_UID
+		INSERT INTO VOCABULARY (
+		   	VOCABULARY_UID
 		    , USER_UID
 		    , ENGLISH
 		    , KOREAN
@@ -22,6 +51,6 @@
 		    , #{source}
 		    , NOW()
 		    , #{userUid}
-		);
+		)
 	</insert>
 </mapper>

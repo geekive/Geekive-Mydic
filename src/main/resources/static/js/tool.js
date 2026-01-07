@@ -62,3 +62,12 @@ function getErrorImageUrl(image, type){
 function setCookie(key, value, path, maxAge){
 	document.cookie = '' + key + '=' + value + '; path=' + path + '; max-age=' + maxAge + '';
 }
+
+function fnEscapeHtml(value){
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}

@@ -33,7 +33,7 @@
 								<div class="row">
 									<label>
 										출처 필터 
-										<select id="sourceFilter">
+										<select id="filter-source">
 											<option value="">전체</option>
 										</select>
 									</label> 
@@ -222,17 +222,149 @@
 			</div>
 		</div>
 	</div>
+	
+<script>
+	let words = [];
+
+	$(function(){
+		/* init list */
+		$.ajax({
+            type			: 'post'
+            , url			: getFullPath('/vocabulary/list')
+            , contentType	: 'application/json'
+			, success		: function(response){
+				if(response.resultCode == 1){
+					let vocaList = response.vocaList;
+					$.each(vocaList, function(index, item){
+						let data = {
+							vocabularyUid 		: item.vocabularyUid
+							, english 			: item.english
+							, korean			: item.korean
+							, example			: item.example
+							, source			: item.source
+							, registrationDate	: item.registrationDate
+						}
+						words.push(data);
+					})
+					render();
+				}else{
+					alert(response.resultMessage);
+				}
+			}
+        });
+		
+		/* add new word */
+	  	$("#btn-save-new-word").on("click", () => {
+	  		fnSaveNewWord(true);
+	  	});
+	  	
+	    function fnSaveNewWord(IS_DESKTOP){
+	    	let data = {
+	    			english 	: $.trim($('#english').val())
+	    			, korean 	: $.trim($('#korean').val())
+	    			, example	: $.trim($('#example').val())
+	    			, source	: $.trim($('#source').val())
+	    	}
+	    	
+	    	// validation
+	    	if(isEmpty(data.english)){
+	    		alert('영어 단어를 입력하세요.'); return
+	    	}
+	    	if(isEmpty(data.korean)){
+	    		alert('한글 뜻을 입력하세요.'); return
+	    	}
+	    	
+	    	// existence check
+	        let flagExistence = words.some(function(word){
+				return String(word.word || '').toLowerCase() === String(data.english).toLowerCase();
+			});
+			if(flagExistence){
+				let ok = confirm('같은 단어가 이미 존재합니다. 그래도 추가할까요?');
+				if(!ok) return false;
+			}
+			
+			// send data 
+			$.ajax({
+	            type			: 'post'
+	            , url			: getFullPath('/vocabulary/save')
+	            , contentType	: 'application/json'
+	            , data			: JSON.stringify(data)
+				, success		: function(response){
+					if(response.resultCode == 1){
+						words.unshift({
+							vocabularyUid		: response.vocabularyUid
+							, english			: response.english
+							, korean			: response.korean
+							, example			: response.example
+							, source			: response.source
+							, registrationDate	: Date.now()
+				        });
+						render();
+						fnRefreshSourceOption();
+						fnResetNewWordForm();
+					}else{
+						alert(response.resultMessage);
+					}
+				}
+	        });
+	      }
+	    
+		function fnResetNewWordForm(){
+			$("#english, #korean, #example, #source").val('');
+		}
+		
+		/* filter */
+		fnRefreshSourceOption();
+		function fnRefreshSourceOption(){
+			const $filterSource = $('#filter-source');
+			const selectedValue = $filterSource.val();
+			$.ajax({
+	            type			: 'post'
+	            , url			: getFullPath('/vocabulary/source')
+	            , contentType	: 'application/json'
+				, success		: function(response){
+					if(response.resultCode == 1){
+						let html		= '<option value="">전체</option>';
+						let sourceList 	= response.sourceList;
+						$.each(sourceList, function(index, item){
+							html += '<option value="' + fnEscapeHtml(item.source) + '">' + fnEscapeHtml(item.source) + '</option>';
+						})
+						$filterSource.html(html);
+						
+						// select previous option
+		                if(selectedValue && $filterSource.find('option[value="' + selectedValue + '"]').length > 0){
+		                	$filterSource.val(selectedValue);
+		                }
+					}else{
+						alert(response.resultMessage);
+					}
+				}
+	        });
+		}
+	})
+	
+	
+ </script>	
 
 	<script>
+	
+    function setSourceOptions(){
+        var sources = uniq(words.map(function(w){ return w.source; })).sort(function(a,b){ return String(a).localeCompare(String(b)); });
+        var current = state.source;
 
-    var words = [
-      { vocabularyUid: '111', english: "based on", korean: "…에 근거하여, …을 바탕으로", example: "Based on the data, we should revise the plan.", source: "업무 이메일", registrationDate: Date.now() - 1000 * 60 * 60 * 2 },
-      { vocabularyUid: '222', english: "thrilled", korean: "매우 기쁜, 설레는", example: "I was thrilled to hear the news.", source: "Netflix 자막", registrationDate: Date.now() - 1000 * 60 * 60 * 22 },
-      { vocabularyUid: '333', english: "counterpart", korean: "상대방(의 대응물), 대응자", example: "Please contact your counterpart on the client side.", source: "회의 메모", registrationDate: Date.now() - 1000 * 60 * 60 * 30 },
-      { vocabularyUid: '444', english: "substitute A for B", korean: "B 대신 A를 쓰다/대체하다", example: "You can substitute almond milk for regular milk.", source: "영어 학습 노트", registrationDate: Date.now() - 1000 * 60 * 60 * 60 },
-      { vocabularyUid: '555', english: "scope", korean: "범위, (프로젝트) 스코프", example: "We need to clarify the scope before implementation.", source: "기술 문서", registrationDate: Date.now() - 1000 * 60 * 60 * 80 },
-      { vocabularyUid: '666', english: "takeaway", korean: "핵심 요점, 얻은 점", example: "My main takeaway is that we should simplify the flow.", source: "TED", registrationDate: Date.now() - 1000 * 60 * 60 * 120 }
-    ];
+        var html = '<option value="">전체</option>';
+        for (var i=0;i<sources.length;i++){
+          var s = sources[i];
+          html += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
+        }
+        $("#filter-source").html(html);
+
+        if(sources.indexOf(current) >= 0){
+          $("#filter-source").val(current);
+        }else{
+          $("#filter-source").val("");
+        }
+	}
 
     var state = {
       q: "",
@@ -416,11 +548,11 @@
       }
 
       if(state.sort === "recent"){
-        out.sort(function(a,b){ return b.createdAt - a.createdAt; });
+        out.sort(function(a,b){ return b.registrationDate - a.registrationDate; });
       }else if(state.sort === "wordAsc"){
-        out.sort(function(a,b){ return String(a.word).localeCompare(String(b.word)); });
+        out.sort(function(a,b){ return String(a.english).localeCompare(String(b.english)); });
       }else if(state.sort === "wordDesc"){
-        out.sort(function(a,b){ return String(b.word).localeCompare(String(a.word)); });
+        out.sort(function(a,b){ return String(b.english).localeCompare(String(a.english)); });
       }
 
       return out;
@@ -573,7 +705,6 @@
       w.example = v.example;
       w.source = v.source;
 
-      setSourceOptions();
       render();
 
       hydrateDetailView(w);
@@ -605,7 +736,7 @@
 
     function applyFilters(){
       state.q = $("#q").val();
-      state.source = $("#sourceFilter").val();
+      state.source = $("#filter-source").val();
       state.sort = $("#sort").val();
       state.exampleOnly = $("#exampleOnly").val();
       state.page = 1;
@@ -645,7 +776,7 @@
     }
 
     $(function(){
-      setSourceOptions();
+
       render();
       setAdvancedOpen(false);
       applyResponsive();
@@ -687,7 +818,7 @@
         if(e.key === "Enter"){ e.preventDefault(); applyFilters(); }
       });
 
-      $("#sourceFilter").on("change", applyFilters);
+      $("#filter-source").on("change", applyFilters);
       $("#sort").on("change", applyFilters);
 
       $("#list")
@@ -753,84 +884,6 @@
       }
       $(window).on("resize", applyResponsive);
     });
-  </script>
-  <script>
-  	$("#btn-save-new-word").on("click", () => {
-  		fnSaveNewWord(true);
-  	});
-  	
-    function fnSaveNewWord(IS_DESKTOP){
-    	let data = {
-    			english 	: $('#english').val()
-    			, korean 	: $('#korean').val()
-    			, example	: $('#example').val()
-    			, source	: $('#source').val()
-    	}
-    	
-    	// validation
-    	if(isEmpty(data.english)){
-    		alert('영어 단어를 입력하세요.'); return
-    	}
-    	if(isEmpty(data.korean)){
-    		alert('한글 뜻을 입력하세요.'); return
-    	}
-    	
-    	// existence check
-        let flagExistence = words.some(function(word){
-			return String(word.word || '').toLowerCase() === String(data.english).toLowerCase();
-		});
-		if(flagExistence){
-			let ok = confirm('같은 단어가 이미 존재합니다. 그래도 추가할까요?');
-			if(!ok) return false;
-		}
-		
-		// send data 
-		$.ajax({
-            type			: 'post'
-            , url			: getFullPath('/vocabulary/save')
-            , contentType	: 'application/json'
-            , data			: JSON.stringify(data)
-			, success		: function(response){
-				if(response.resultCode == 1){
-					words.unshift({
-						vocabularyUid		: response.vocabularyUid
-						, english			: response.english
-						, korean			: response.korean
-						, example			: response.example
-						, source			: response.source
-						, registrationDate	: Date.now()
-			        });
-					render();
-					setSourceOptions();
-					fnResetNewWordForm();
-				}else{
-					alert(response.resultMessage);
-				}
-			}
-        });
-      }
-    
-	function fnResetNewWordForm(){
-		$("#english, #korean, #example, #source").val('');
-	}
-	
-    function setSourceOptions(){
-        var sources = uniq(words.map(function(w){ return w.source; })).sort(function(a,b){ return String(a).localeCompare(String(b)); });
-        var current = state.source;
-
-        var html = '<option value="">전체</option>';
-        for (var i=0;i<sources.length;i++){
-          var s = sources[i];
-          html += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
-        }
-        $("#sourceFilter").html(html);
-
-        if(sources.indexOf(current) >= 0){
-          $("#sourceFilter").val(current);
-        }else{
-          $("#sourceFilter").val("");
-        }
-      }
   </script>
 </c:set>
 

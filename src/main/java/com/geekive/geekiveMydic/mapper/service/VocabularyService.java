@@ -1,5 +1,7 @@
 package com.geekive.geekiveMydic.mapper.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,16 @@ public class VocabularyService implements VocabularyMapper{
 	
 	@Autowired
 	VocabularyMapper vocabularyMapper;
+
+	@Override
+	public List<GeekiveMap> selectVocabularyList(GeekiveMap gMap) {
+		return vocabularyMapper.selectVocabularyList(gMap);
+	}
+
+	@Override
+	public List<GeekiveMap> selectSourceList(GeekiveMap gMap) {
+		return vocabularyMapper.selectSourceList(gMap);
+	}
 
 	@Override
 	public void insertVocabulary(GeekiveMap gMap) {

@@ -1,5 +1,7 @@
 package com.geekive.geekiveMydic.controller;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,36 @@ public class VocabularyController {
 	@GetMapping(value = {"", "/"})
 	public String listGet() throws Exception{
 		return "vocabulary/list";
+	}
+	
+	@ResponseBody
+	@PostMapping(value = "/list")
+	public GeekiveMap listPost() throws Exception{
+		GeekiveMap gMap = new GeekiveMap();
+		List<GeekiveMap> vocaList = null;
+		try {
+			vocaList = vocabularyService.selectVocabularyList(gMap);
+		} catch (Exception e) {
+			gMap.setResultCode(0);
+			gMap.setResultMessage(e.getMessage());
+		}
+		gMap.put("vocaList", vocaList);
+		return gMap;
+	}
+	
+	@ResponseBody
+	@PostMapping(value = "/source")
+	public GeekiveMap sourcePost() throws Exception{
+		GeekiveMap gMap = new GeekiveMap();
+		List<GeekiveMap> sourceList = null;
+		try {
+			sourceList = vocabularyService.selectSourceList(gMap);
+		} catch (Exception e) {
+			gMap.setResultCode(0);
+			gMap.setResultMessage(e.getMessage());
+		}
+		gMap.put("sourceList", sourceList);
+		return gMap;
 	}
 	
 	@ResponseBody

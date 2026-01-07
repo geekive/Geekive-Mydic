@@ -82,8 +82,8 @@
 	<div class="modal-card sign-card">
 		<div class="modal-b">
 			<form id="loginForm" class="auth-form" autocomplete="on">
-				<label> 이메일 <input id="signin-email" type="text" inputmode="email" autocomplete="email" placeholder="example@domain.com"></label>
-				<label> 패스워드 <input id="signin-password" type="password" autocomplete="current-password" placeholder="********"></label>
+				<label> 이메일 <input id="signin-email" type="text" inputmode="email" autocomplete="off"  placeholder="example@domain.com"></label>
+				<label> 패스워드 <input id="signin-password" type="password" autocomplete="off" placeholder="********"></label>
 				<div class="modal-actions">
 					<button class="btn primary" id="btn-signin-save" type="submit">로그인</button>
 					<button class="close" id="btn-signin-close" type="button">닫기</button>
