@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geekive.geekiveMydic.mapper.LogMapper">
+	
+	<insert id="insertLogArchiveVisit">
+		/* LogMapper.insertLogArchiveVisit */
+		INSERT INTO LOG_ARCHIVE_VISIT (
+		    LOG_UID, USER_UID, VIEW_DATE, IP, DEVICE, BROWSER
+		)
+		SELECT
+		    #{logUid}
+		    , #{currentArchiveUserUid}
+		    , NOW()
+		    , #{ip}
+		    , #{device}
+		    , #{browser}
+		FROM 
+			DUAL
+		WHERE NOT EXISTS (
+		    SELECT 
+		    	1
+		    FROM 
+		    	LOG_ARCHIVE_VISIT
+		    WHERE 
+		    	USER_UID 	= #{currentArchiveUserUid}
+		      	AND IP 		= #{ip}
+		      	AND VIEW_DATE <![CDATA[>]]> DATE_SUB(NOW(), INTERVAL 60 MINUTE)
+		)
+	</insert>
+
+	<insert id="insertLogArticleView">
+		/* LogMapper.insertLogArticleView */
+		INSERT INTO LOG_ARTICLE_VIEW (
+		    LOG_UID, ARTICLE_UID, VIEW_DATE, IP, DEVICE, BROWSER
+		)
+		SELECT
+		    #{logUid}
+		    , #{currentArticleUid}
+		    , NOW()
+		    , #{ip}
+		    , #{device}
+		    , #{browser}
+		FROM 
+			DUAL
+		WHERE NOT EXISTS (
+		    SELECT 
+		    	1
+		    FROM 
+		    	LOG_ARTICLE_VIEW
+		    WHERE 
+		    	ARTICLE_UID = #{currentArticleUid}
+		      	AND IP 		= #{ip}
+		      	AND VIEW_DATE <![CDATA[>]]> DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+		)
+	</insert>
+</mapper>

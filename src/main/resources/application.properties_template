@@ -1,0 +1,58 @@
+# set port and context path
+server.port=2222
+server.servlet.context-path=/
+
+# make jsp available
+spring.mvc.view.prefix=/WEB-INF/jsp/
+spring.mvc.view.suffix=.jsp
+
+# db connection(maria db) (local)
+# spring.datasource.driverClassName=org.mariadb.jdbc.Driver
+spring.datasource.driverClassName=net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+spring.datasource.url=jdbc:log4jdbc:mysql://localhost:0000/yourDataBaseName?characterEncoding=UTF-8&serverTimezone=UTC
+spring.datasource.username=yourId
+spring.datasource.password=yourPassword
+
+# mybatis
+mybatis.configuration.map-underscore-to-camel-case=true
+mybatis.type-aliases-package=com.geekive.geekiveMydic.geekiveCustom, com.geekive.geekiveMydic.vo
+mybatis.mapper-locations=mapper/*.xml
+
+# admin server (local)
+admin.server.url=http://localhost:0000/admin
+
+# storage server (local)
+file.server.url=http://localhost:1111/storage
+file.server.upload.url=${file.server.url}/upload
+
+# user server (local)
+user.server.url=http://localhost:2222
+
+# file size
+spring.servlet.multipart.max-file-size=20MB
+spring.servlet.multipart.max-request-size=20MB
+
+# spring message
+spring.messages.basename=messages
+spring.messages.encoding=UTF-8
+
+# spring mail
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=yourEmail
+spring.mail.password=yourEmailPassword
+spring.mail.protocol=smtp
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.default-encoding=UTF-8
+
+# security
+spring.security.user.name=yourName
+spring.security.user.password=yourPassword
+spring.security.user.roles=yourRole
+
+# encryption key
+encryption.secretKey=yourSecretKey
+
+# jwt key
+jwt.secretkey=yourSecretKey

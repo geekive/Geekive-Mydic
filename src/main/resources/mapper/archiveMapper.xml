@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geekive.geekiveMydic.mapper.ArchiveMapper">
+	<select id="selectUserUid" parameterType="geekiveMap" resultType="String">
+		/* archiveMapper.selectUserUid */
+		SELECT USER_UID FROM USER WHERE ARCHIVE_NAME = CONVERT_DASH_TO_SPACE(#{archiveName})
+	</select>
+
+	<select id="selectArchiveLogo" parameterType="geekiveMap" resultType="String">
+		/* archiveMapper.selectArchiveLogo */
+		SELECT GET_ARCHIVE_LOGO(#{userUid})
+	</select>
+	
+	<select id="selectArchiveUrlPath" parameterType="geekiveMap" resultType="String">
+		/* archiveMapper.selectArchiveUrlPath */
+		SELECT GET_ARCHIVE_URL_PATH(#{userUid})
+	</select>
+
+	<select id="selectCategoryUid" parameterType="geekiveMap" resultType="String">
+		/* archiveMapper.selectCategoryUid */
+		SELECT 
+			CATEGORY_UID 
+		FROM 
+			`CATEGORY` 
+		WHERE 
+			REGISTRATION_USER 	= #{userUid}
+			AND URL_PATH		= #{categoryUrlPath}
+			AND FLAG_DELETED	= 'N'
+	</select>
+	
+	<select id="checkArticleExistence" parameterType="geekiveMap" resultType="Boolean">
+		/* archiveMapper.checkArticleExistence */
+		SELECT EXISTS (
+			SELECT
+				1
+			FROM
+				(
+				SELECT 
+					ROW_NUMBER() OVER (ORDER BY REGISTRATION_DATE ASC) AS NUM
+					, FLAG_DELETED
+				FROM 
+					ARTICLE
+				WHERE
+					REGISTRATION_USER 	= #{userUid}
+					AND CATEGORY_UID	= #{categoryUid}
+				) RSLT
+			WHERE
+			   RSLT.NUM = #{articleNumber}
+		) AS FLAG_EXISTENCE
+	</select>
+	
+	<select id="selectCategoryName" parameterType="geekiveMap" resultType="String">
+		/* archiveMapper.selectCategoryName */
+		SELECT CATEGORY_NAME FROM `CATEGORY` WHERE CATEGORY_UID = #{currentCategoryUid}
+	</select>
+	
+	<select id="selectArticleUid" parameterType="geekiveMap" resultType="String">
+		/* archiveMapper.selectArticleUid */
+		SELECT
+			RSLT.ARTICLE_UID AS articleUid
+		FROM
+			(
+			SELECT
+    			ROW_NUMBER() OVER (PARTITION BY CATEGORY_UID ORDER BY REGISTRATION_DATE ASC) 	AS NUM
+				, ARTICLE_UID
+			FROM
+    			ARTICLE
+			WHERE
+				REGISTRATION_USER 	= #{userUid}
+    			AND CATEGORY_UID 	= #{categoryUid}
+			) RSLT
+		WHERE
+			RSLT.NUM = #{articleNumber}
+	</select>
+	
+	<select id="selectArticleListCount" resultType="Integer">
+		/* archiveMapper.selectArticleListCount */
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT
+				ROW_NUMBER() OVER (ORDER BY RSLT1.REGISTRATION_DATE DESC) 	AS PAGING_INDEX
+				, RSLT1.NUM 												AS num
+				, RSLT1.ARTICLE_UID 										AS articleUid
+				, RSLT1.TITLE 												AS title
+				<![CDATA[
+				, REGEXP_REPLACE(RSLT1.CONTENT, '<[^>]+>', '')				AS content
+				]]>
+				, RSLT1.URL_PATH 											AS thumbnailUrlPath
+				, GET_ARTICLE_URL(RSLT1.ARTICLE_UID, RSLT1.NUM)				AS articleUrlPath
+				, RSLT1.CATEGORY_UID
+				, RSLT1.CATEGORY_NAME										AS categoryName
+				, RSLT1.REGISTRATION_USER 
+				, DATE_FORMAT(RSLT1.REGISTRATION_DATE, '%Y. %m. %d') 		AS registrationDate
+				, RSLT1.FLAG_DELETED
+			FROM
+				(
+				SELECT 
+					ROW_NUMBER() OVER (PARTITION BY A.CATEGORY_UID ORDER BY A.REGISTRATION_DATE ASC) 	AS NUM
+				    , A.ARTICLE_UID
+				    , A.TITLE
+				    , A.CONTENT
+				    , F.URL_PATH
+				    , C.CATEGORY_UID
+				    , C.CATEGORY_NAME
+				    , A.REGISTRATION_USER
+				    , A.REGISTRATION_DATE
+					, A.FLAG_DELETED
+					, A.FLAG_ACTIVATED
+				FROM 
+					ARTICLE A
+					LEFT JOIN `FILE` F
+					ON
+						F.FILE_UID = A.THUMBNAIL_UID
+					LEFT JOIN CATEGORY C 
+				    ON 
+				        C.CATEGORY_UID = A.CATEGORY_UID		
+					<if test="currentArchiveUserUid != null and currentArchiveUserUid != ''">
+						WHERE
+							A.REGISTRATION_USER = #{currentArchiveUserUid}
+							<if test="currentCategoryUid != null and currentCategoryUid != ''">
+								AND A.CATEGORY_UID	= #{currentCategoryUid}
+							</if>
+					</if>
+				) RSLT1
+			WHERE
+			    RSLT1.FLAG_DELETED 			= 'N'
+			    AND RSLT1.FLAG_ACTIVATED 	= 'Y'
+				<if test="searchValue != null and searchValue != ''">
+					AND RSLT1.TITLE LIKE CONCAT('%', #{searchValue}, '%')
+				</if>
+			ORDER BY 
+				RSLT1.REGISTRATION_DATE DESC
+			) RSLT2
+	</select>
+
+	<select id="selectArticleList" resultType="geekiveMap">
+		/* archiveMapper.selectArticleList */
+		SELECT
+			RSLT2.*
+		FROM
+			(
+			SELECT
+				ROW_NUMBER() OVER (ORDER BY RSLT1.REGISTRATION_DATE DESC) 						AS PAGING_INDEX
+				, RSLT1.NUM 																	AS num
+				, RSLT1.ARTICLE_UID 															AS articleUid
+				, RSLT1.TITLE 																	AS title
+				<![CDATA[
+				, REGEXP_REPLACE(REGEXP_REPLACE(RSLT1.CONTENT, '<[^>]+>', ''), '&nbsp;', '')	AS content
+				]]>
+				, RSLT1.URL_PATH 																AS thumbnailUrlPath
+				, GET_ARTICLE_URL(RSLT1.ARTICLE_UID, RSLT1.NUM)									AS articleUrlPath
+				, RSLT1.CATEGORY_UID
+				, RSLT1.CATEGORY_NAME															AS categoryName
+				, RSLT1.REGISTRATION_USER 
+				, DATE_FORMAT(RSLT1.REGISTRATION_DATE, '%Y. %m. %d') 							AS registrationDate
+				, RSLT1.FLAG_DELETED
+			FROM
+				(
+				SELECT 
+					ROW_NUMBER() OVER (PARTITION BY A.CATEGORY_UID ORDER BY A.REGISTRATION_DATE ASC) 	AS NUM
+				    , A.ARTICLE_UID
+				    , A.TITLE
+				    , A.CONTENT
+				    , F.URL_PATH
+				    , C.CATEGORY_UID
+				    , C.CATEGORY_NAME
+				    , A.REGISTRATION_USER
+				    , A.REGISTRATION_DATE
+					, A.FLAG_DELETED
+					, A.FLAG_ACTIVATED
+				FROM 
+					ARTICLE A
+					LEFT JOIN `FILE` F
+					ON
+						F.FILE_UID = A.THUMBNAIL_UID
+					LEFT JOIN CATEGORY C 
+				    ON 
+				        C.CATEGORY_UID = A.CATEGORY_UID	
+					<if test="currentArchiveUserUid != null and currentArchiveUserUid != ''">
+						WHERE
+							A.REGISTRATION_USER = #{currentArchiveUserUid}
+							<if test="currentCategoryUid != null and currentCategoryUid != ''">
+								AND A.CATEGORY_UID	= #{currentCategoryUid}
+							</if>
+					</if>
+				) RSLT1
+			WHERE
+			    RSLT1.FLAG_DELETED 			= 'N'
+			    AND RSLT1.FLAG_ACTIVATED 	= 'Y'
+				<if test="searchValue != null and searchValue != ''">
+					AND RSLT1.TITLE LIKE CONCAT('%', #{searchValue}, '%')
+				</if>
+			ORDER BY 
+				RSLT1.REGISTRATION_DATE DESC
+			) RSLT2
+		WHERE 
+			PAGING_INDEX <![CDATA[>]]> ${dataPagingIndex}
+		ORDER BY
+			PAGING_INDEX ASC	
+		LIMIT #{dataCountPerPage}
+	</select>
+	
+	<select id="selectArticle" resultType="geekiveMap">
+		/* archiveMapper.selectArticle */
+		SELECT
+			RSLT.*
+		FROM
+			(
+			SELECT
+    			ROW_NUMBER() OVER (PARTITION BY CATEGORY_UID ORDER BY REGISTRATION_DATE ASC) 	AS NUM
+    			, TITLE																			AS title
+    			, CONTENT																		AS content
+    			, DATE_FORMAT(REGISTRATION_DATE, '%Y. %m. %d') 									AS registrationDate
+    			, FLAG_DELETED																	AS flagDeleted
+			FROM
+    			ARTICLE
+			WHERE
+				REGISTRATION_USER 	= #{currentArchiveUserUid}
+    			AND CATEGORY_UID 	= #{currentCategoryUid}
+			) RSLT
+		WHERE
+			RSLT.NUM = #{currentArticleNumber}
+	</select>
+</mapper>

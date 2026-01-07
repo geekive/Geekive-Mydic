@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geekive.geekiveMydic.mapper.SignMapper">
+
+	<select id="checkEmailExistence" parameterType="geekiveMap" resultType="Boolean">
+		/* signMapper.checkEmailExistence */
+	    SELECT EXISTS (
+	    	SELECT 
+	    		1
+	        FROM 
+	        	USER
+	        WHERE 
+	        	EMAIL = #{email}
+		) AS FLAG_EXISTENCE
+	</select>
+	
+	<insert id="insertUser">
+		/* signMapper.insertUser */
+		INSERT INTO USER (
+			USER_UID
+			, EMAIL
+			, `PASSWORD`
+			, NAME
+			, REGISTRATION_DATE
+			, REGISTRATION_USER
+		) VALUES (
+			#{userUid}
+			, #{email}
+			, #{password}
+			, #{name}
+			, NOW()
+			, #{userUid}
+		)
+	</insert>
+	
+	<select id="selectUser" parameterType="geekiveMap" resultType="geekiveMap">
+		/* signMapper.selectUser */
+		SELECT 
+			USER_UID							AS userUid
+			, PASSWORD							AS password
+			, NAME								AS name
+		FROM
+			USER
+		WHERE
+			EMAIL 				= #{email}
+			AND FLAG_DELETED 	= 'N'
+	</select>
+</mapper>

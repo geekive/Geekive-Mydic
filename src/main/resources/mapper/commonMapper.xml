@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geekive.geekiveMydic.mapper.CommonMapper">
+
+	<select id="selectSocialMedia" resultType="geekiveMap">
+		/* commonMapper.selectSocialMedia */
+		SELECT
+			SOCIAL_MEDIA_TYPE	AS socialMediaType
+			, URL				AS url
+		FROM
+			SOCIAL_MEDIA
+		WHERE
+			FLAG_ARCHIVE_ACTIVATED 	= 'Y'
+			AND FLAG_DELETED 		= 'N'
+			AND USER_UID 			= #{currentArchiveUserUid}
+	</select>
+
+	<select id="selectAllCategory" resultType="geekiveMap">
+		/* commonMapper.selectAllCategory */
+		WITH RECURSIVE CATEGORY_TREE AS (
+		    SELECT 
+		        C1.CATEGORY_UID
+		        , C1.PARENT_CATEGORY_UID
+		        , C1.CATEGORY_NAME
+		        , C1.URL_PATH
+		        , C1.DEPTH
+		        , CAST(LPAD(C1.`ORDER`, 5, '0') AS CHAR(255)) AS SORT_PATH
+				, C1.FLAG_ACTIVATED
+				, C1.FLAG_DELETED   
+		    FROM 
+		    	CATEGORY C1
+		    WHERE 
+		    	C1.PARENT_CATEGORY_UID IS NULL
+		    	AND C1.USER_UID = #{currentArchiveUserUid}
+		
+		    UNION ALL
+		
+		    SELECT 
+		        C2.CATEGORY_UID
+		        , C2.PARENT_CATEGORY_UID
+		        , C2.CATEGORY_NAME
+		        , C2.URL_PATH
+		        , C2.DEPTH
+		        , CONCAT(CT.SORT_PATH, '-', LPAD(C2.`ORDER`, 5, '0')) AS SORT_PATH
+		        , C2.FLAG_ACTIVATED
+				, C2.FLAG_DELETED
+		    FROM 
+		    	CATEGORY C2
+		    	INNER JOIN CATEGORY_TREE CT 
+		    	ON 
+		    		C2.PARENT_CATEGORY_UID 	= CT.CATEGORY_UID
+		    		AND C2.USER_UID 		= #{currentArchiveUserUid}
+		)
+		SELECT 
+		    CATEGORY_UID							AS categoryUid
+		    , PARENT_CATEGORY_UID					AS parentCategoryUid
+		    , CATEGORY_NAME							AS categoryName 
+		    , URL_PATH								AS urlPath
+		    , DEPTH									AS depth
+		FROM 
+			CATEGORY_TREE
+		WHERE
+            FLAG_ACTIVATED 		= 'Y'
+			AND FLAG_DELETED 	= 'N'
+		ORDER BY 
+			SORT_PATH
+	</select>
+</mapper>

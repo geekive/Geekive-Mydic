@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geekive.geekiveMydic.mapper.HomeMapper">
+	<select id="selectNewArticle" resultType="geekiveMap">
+		/* homeMapper.selectNewArticle */
+		SELECT
+			RSLT.ARTICLE_UID 																AS articleUid
+			, GET_ARCHIVE_LOGO(RSLT.USER_UID)												AS archiveLogo
+			, RSLT.TITLE 																	AS title
+			<![CDATA[
+			, REGEXP_REPLACE(REGEXP_REPLACE(RSLT.CONTENT, '<[^>]+>', ''), '&nbsp;', '')		AS content
+			]]>
+			, RSLT.URL_PATH 																AS thumbnailUrlPath
+			, GET_ARTICLE_URL(RSLT.ARTICLE_UID, RSLT.NUM) 									AS articleUrlPath
+			, DATE_FORMAT(RSLT.REGISTRATION_DATE, '%Y. %m. %d')								AS registrationDate
+		FROM 
+			(
+			SELECT
+				ROW_NUMBER() OVER (
+			        PARTITION BY A.REGISTRATION_USER, A.CATEGORY_UID
+			        ORDER BY A.REGISTRATION_DATE ASC
+			  	) AS NUM
+				, A.ARTICLE_UID
+				, A.USER_UID
+				, A.TITLE
+				, A.CONTENT
+			   	, F.URL_PATH		
+			   	, A.REGISTRATION_DATE
+			   	, A.FLAG_DELETED
+			   	, A.FLAG_ACTIVATED
+			FROM 
+				ARTICLE A
+				LEFT JOIN `FILE` F
+				ON
+					F.FILE_UID = A.THUMBNAIL_UID
+			) RSLT
+		WHERE
+			RSLT.FLAG_DELETED 		= 'N'
+			AND RSLT.FLAG_ACTIVATED = 'Y'
+		ORDER BY
+			RSLT.REGISTRATION_DATE DESC
+		LIMIT 5
+	</select>
+	
+	<select id="selectRandomArchive" resultType="geekiveMap">
+		/* homeMapper.selectRandomArchive */
+		SELECT
+			U.USER_UID									AS userUid
+			, U.ARCHIVE_NAME							AS archiveName
+			, GET_ARCHIVE_URL_PATH(U.USER_UID)			AS archiveUrlPath
+			, GET_ARCHIVE_LOGO(U.USER_UID)				AS archiveLogo
+			, F.URL_PATH								AS profileImagelUrlPath
+		FROM
+			USER U
+			LEFT JOIN `FILE` F
+			ON
+				F.FILE_UID = U.PROFILE_IMAGE_UID
+		WHERE
+			U.FLAG_DELETED = 'N'
+		ORDER BY 
+			RAND()
+		LIMIT 10
+	</select>
+</mapper>
