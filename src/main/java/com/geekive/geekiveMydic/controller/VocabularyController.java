@@ -69,4 +69,28 @@ public class VocabularyController {
 		}
 		return gMap;
 	}
+	
+	@ResponseBody
+	@PostMapping(value = "/edit")
+	public GeekiveMap editPost(@RequestBody GeekiveMap gMap) throws Exception{
+		try {
+			vocabularyService.updateVocabulary(gMap);
+		} catch (Exception e) {
+			gMap.setResultCode(0);
+			gMap.setResultMessage(e.getMessage());
+		}
+		return gMap;
+	}
+	
+	@ResponseBody
+	@PostMapping(value = "/delete")
+	public GeekiveMap deletePost(@RequestBody GeekiveMap gMap) throws Exception{
+		try {
+			vocabularyService.deleteVocabulary(gMap);
+		} catch (Exception e) {
+			gMap.setResultCode(0);
+			gMap.setResultMessage(e.getMessage());
+		}
+		return gMap;
+	}
 }

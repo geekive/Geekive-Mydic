@@ -718,6 +718,9 @@ input::placeholder, textarea::placeholder {
 	.fab {
 		display: flex;
 	}
+	#addPanel{
+		display: none;
+	}
 }
 
 /* =========================

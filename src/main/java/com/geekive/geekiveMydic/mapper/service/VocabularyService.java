@@ -37,4 +37,24 @@ public class VocabularyService implements VocabularyMapper{
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void updateVocabulary(GeekiveMap gMap) {
+		try {
+			vocabularyMapper.updateVocabulary(gMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void deleteVocabulary(GeekiveMap gMap) {
+		try {
+			vocabularyMapper.deleteVocabulary(gMap);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 }

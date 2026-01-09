@@ -42,8 +42,8 @@
 	<div class="drawer-backdrop" id="drawerBackdrop"></div>
 	<aside class="drawer-panel" role="dialog" aria-label="메뉴">
 		<div class="drawer-h">
-			<div class="title">
-				<strong>Mydic, The best note ever.</strong>
+			<div class="title hero-title">
+				<strong style="font-size: 16pt; cursor: pointer;" onclick="goToPage('/')">Mydic</strong>
 			</div>
 			<button class="icon-btn" id="btnDrawerClose" type="button" aria-label="메뉴 닫기" title="닫기">
 				<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

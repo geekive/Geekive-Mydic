@@ -11,4 +11,6 @@ public interface VocabularyMapper {
 	public List<GeekiveMap> selectVocabularyList(GeekiveMap gMap);
 	public List<GeekiveMap> selectSourceList(GeekiveMap gMap);
 	public void insertVocabulary(GeekiveMap gMap);
+	public void updateVocabulary(GeekiveMap gMap);
+	public void deleteVocabulary(GeekiveMap gMap);
 }

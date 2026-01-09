@@ -41,16 +41,12 @@
 										정렬 
 										<select id="sort">
 											<option value="recent">최근 추가 순</option>
-											<option value="wordAsc">단어 A→Z</option>
-											<option value="wordDesc">단어 Z→A</option>
+											<option value="asc">단어 A→Z</option>
+											<option value="desc">단어 Z→A</option>
 										</select>
 									</label>
 								</div>
 							</div>
-						</div>
-
-						<div class="actions">
-							<button class="btn primary" id="btnApply" type="button">적용</button>
 						</div>
 					</div>
 				</div>
@@ -107,7 +103,7 @@
 	</main>
 
 	<!-- Floating Action Button -->
-	<button class="fab" id="fabAdd" type="button" aria-label="단어 추가 열기" title="단어 추가">
+	<button class="fab" id="btn-floating" type="button" aria-label="단어 추가 열기" title="단어 추가">
 		<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
 			<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
     	</svg>
@@ -118,16 +114,15 @@
 		<div class="modal-card">
 			<div class="modal-h">
 				<div class="title">
-					<strong id="mWord">word</strong> <span id="mMeta">meta</span>
+					<strong id="mEnglish">word</strong> <span id="mRegistrationDate">meta</span>
 				</div>
-				<button class="close" id="mClose" type="button">닫기</button>
 			</div>
 
 			<div class="modal-b">
 				<div id="detailView" style="display: flex; flex-direction: column; gap: 10px;">
 					<div class="kv">
 						<div class="k">한글 뜻</div>
-						<div class="v" id="mMeaning"></div>
+						<div class="v" id="mKorean"></div>
 					</div>
 					<div class="kv">
 						<div class="k">예문</div>
@@ -139,7 +134,9 @@
 					</div>
 
 					<div class="modal-actions">
-						<button class="btn" id="btnEdit" type="button">수정하기</button>
+						<button class="btn" id="btn-open-edit" type="button">수정하기</button>
+						<button class="btn" id="btn-delete" type="button">삭제</button>
+						<button class="close" id="btn-close-edit" type="button">닫기</button>
 					</div>
 				</div>
 
@@ -148,14 +145,14 @@
 						<div class="kv edit">
 							<div class="k">영어 단어</div>
 							<div class="v">
-								<input type="text" id="eWord" placeholder="예: based on" />
+								<input type="text" id="eEnglish" placeholder="예: based on" />
 							</div>
 						</div>
 
 						<div class="kv edit">
 							<div class="k">한글 뜻</div>
 							<div class="v">
-								<input type="text" id="eMeaning"
+								<input type="text" id="eKorean"
 									placeholder="예: …에 근거하여, …을 바탕으로" />
 							</div>
 						</div>
@@ -177,8 +174,8 @@
 						</div>
 
 						<div class="modal-actions">
+							<button class="btn primary" id="btn-edit" type="button">저장</button>
 							<button class="btn" id="btnEditCancel" type="button">취소</button>
-							<button class="btn primary" id="btnEditSave" type="button">저장</button>
 						</div>
 					</div>
 				</div>
@@ -187,36 +184,35 @@
 	</div>
 
 	<!-- Add word modal (mobile flow) -->
-	<div class="modal" id="addModal" role="dialog" aria-modal="true"
+	<div class="modal" id="modal-new-word" role="dialog" aria-modal="true"
 		aria-label="신규 단어 등록">
 		<div class="modal-card">
 			<div class="modal-h">
 				<div class="title">
 					<strong>단어 등록</strong>
 				</div>
-				<button class="close" id="addClose" type="button">닫기</button>
 			</div>
 			<div class="modal-b">
 				<div class="form">
 					<label>
 						영어 단어 
-						<input id="mAddWord" type="text" placeholder="based on" />
+						<input id="english-m" type="text" placeholder="based on" />
 					</label> 
 					<label> 
 						한글 뜻 
-						<input id="mAddMeaning" type="text" placeholder="…에 근거하여, …을 바탕으로" />
+						<input id="korean-m" type="text" placeholder="…에 근거하여, …을 바탕으로" />
 					</label> 
 					<label> 
 						예문 
-						<textarea id="mAddExample" placeholder="Based on the data, we should revise the plan."></textarea>
+						<textarea id="example-m" placeholder="Based on the data, we should revise the plan."></textarea>
 					</label> 
 					<label> 
 						출처 
-						<input id="mAddSource" type="text" placeholder="뉴스 / 영화 / 회의 / 유튜브 등" />
+						<input id="source-m" type="text" placeholder="뉴스 / 영화 / 회의 / 유튜브 등" />
 					</label>
 					<div class="actions">
-						<button class="btn" id="mAddClear" type="button">비우기</button>
-						<button class="btn primary" id="mAddSubmit" type="button">추가</button>
+						<button class="btn primary" id="btn-save-new-word-m" type="button">추가</button>
+						<button class="close" id="btn-close-new-word-m" type="button">닫기</button>
 					</div>
 				</div>
 			</div>
@@ -225,6 +221,14 @@
 	
 <script>
 	let words = [];
+	let state = {
+		q				: ""
+		, source		: ""
+		, sort			: "recent"
+		, page			: 1
+		, pageSize		: 5
+		, advancedOpen	: false
+	};
 
 	$(function(){
 		/* init list */
@@ -260,10 +264,10 @@
 	  	
 	    function fnSaveNewWord(IS_DESKTOP){
 	    	let data = {
-	    			english 	: $.trim($('#english').val())
-	    			, korean 	: $.trim($('#korean').val())
-	    			, example	: $.trim($('#example').val())
-	    			, source	: $.trim($('#source').val())
+	    			english 	: $.trim(IS_DESKTOP ? $('#english').val() : $('#english-m').val())
+	    			, korean 	: $.trim(IS_DESKTOP ? $('#korean').val() : $('#korean-m').val())
+	    			, example	: $.trim(IS_DESKTOP ? $('#example').val() : $('#example-m').val())
+	    			, source	: $.trim(IS_DESKTOP ? $('#source').val() : $('#source-m').val())
 	    	}
 	    	
 	    	// validation
@@ -276,7 +280,7 @@
 	    	
 	    	// existence check
 	        let flagExistence = words.some(function(word){
-				return String(word.word || '').toLowerCase() === String(data.english).toLowerCase();
+				return String(word.english || '').toLowerCase() === String(data.english).toLowerCase();
 			});
 			if(flagExistence){
 				let ok = confirm('같은 단어가 이미 존재합니다. 그래도 추가할까요?');
@@ -306,14 +310,137 @@
 						alert(response.resultMessage);
 					}
 				}
-	        });
-	      }
+			});
+		}
 	    
 		function fnResetNewWordForm(){
 			$("#english, #korean, #example, #source").val('');
 		}
 		
-		/* filter */
+		/* floating button + add new word in modal */
+		$("#btn-floating").on("click", fnOpenNewWordModal);
+	  	$("#btn-save-new-word-m").on("click", () => {fnSaveNewWord(false);});
+	  	$("#btn-close-new-word-m").on("click", function(){fnCloseNewWordModal();});
+		
+	    function fnOpenNewWordModal(){
+	    	fnResetNewWordModal();
+	    	$("#modal-new-word").addClass("open");
+	    	$('body').toggleClass('modal-open');
+	        setTimeout(function(){ $("#english-m").trigger("focus"); }, 0);
+		}
+	    
+		function fnResetNewWordModal(){
+			$("#english-m, #korean-m, #example-m, #source-m").val('');
+		}
+		
+	    function fnCloseNewWordModal(){
+	        $("#modal-new-word").removeClass("open");
+	        $('body').toggleClass('modal-open');
+		}
+	    
+	    /* search + filter */
+		$("#q").on("input", fnApplyFilters);
+		$("#filter-source").on("change", fnApplyFilters);
+		$("#sort").on("change", fnApplyFilters);
+		
+	    function fnApplyFilters(){
+	        state.q 			= $("#q").val();
+	        state.source 		= $("#filter-source").val();
+	        state.sort 			= $("#sort").val();
+	        state.page 			= 1;
+	        render();
+		}
+	    
+	    function render(){
+	    	let filtered 	= fnFiltering();
+	    	let total 		= filtered.length;
+
+	    	let totalPages 	= Math.max(1, Math.ceil(total / state.pageSize));
+	        state.page 		= Math.min(state.page, totalPages);
+
+	        let start 		= (state.page - 1) * state.pageSize;
+	        let pageItems 	= filtered.slice(start, start + state.pageSize);
+
+	        $("#statText").text(total + " items · page " + state.page + "/" + totalPages);
+
+			if(pageItems.length === 0){
+				$("#list").html('<div class="hint">조건에 맞는 결과가 없습니다. 검색어/필터를 조정하세요.</div>');
+			}else{
+	        	let html = '';
+				for(let i = 0; i < pageItems.length; i++){
+					let w = pageItems[i];
+		            html += ''
+						+ '<div class="item" data-id="' + w.vocabularyUid + '" tabindex="0" role="button" aria-label="단어 상세 열기">'
+		              	+ 	'<div class="badge">WORD</div>'
+		              	+   '<div class="meta">'
+		              	+     	'<div class="topline">'
+		              	+       	'<div class="word">' + fnEscapeHtml(w.english) + '</div>'
+		             	+       	'<div class="meaning">' + fnEscapeHtml(w.korean) + '</div>'
+		             	+     	'</div>'
+		            	+     	'<div class="example">' + fnEscapeHtml(w.example) + '</div>'
+		              	+     	'<div class="source">'
+		              	+       	'<span class="chip">' + fnEscapeHtml(w.registrationDate) + '</span>'
+		              	+       	'<span class="chip">' + fnEscapeHtml(w.source) + '</span>'
+		              	+     	'</div>'
+		              	+   '</div>'
+		              	+ '</div>';
+	          	}
+	          $("#list").html(html);
+	        }
+
+			$("#pager").html(
+				'<button type="button" ' + (state.page <= 1 ? "disabled" : "") + ' data-act="prev">이전</button>'
+				+ '<span>' + state.page + " / " + totalPages + '</span>'
+				+ '<button type="button" ' + (state.page >= totalPages ? "disabled" : "") + ' data-act="next">다음</button>'
+			);
+		}
+	    
+	    function fnFiltering(){
+	        let q 	= String(state.q || "").trim();
+	        let out = words.slice();
+
+	        // filtered by source
+	        if(state.source){
+				out = out.filter(function(w){ return w.source === state.source; });
+	        }
+
+	        // filtered by search
+	        if(q){
+				out = out.filter(function(w){
+				return includesCI(w.english, q) ||
+	                   includesCI(w.korean, q) ||
+	                   includesCI(w.example, q) ||
+	                   includesCI(w.source, q);
+				});
+	        }
+
+			// filtered by order
+	        if(state.sort === "recent"){
+				out.sort(function(a,b){ return b.registrationDate - a.registrationDate; });
+	        }else if(state.sort === "asc"){
+				out.sort(function(a,b){ return String(a.english).localeCompare(String(b.english)); });
+	        }else if(state.sort === "desc"){
+				out.sort(function(a,b){ return String(b.english).localeCompare(String(a.english)); });
+	        }
+	        return out;
+	      }
+	    
+		function includesCI(target, q){
+			if(!q) return true;
+	        return String(target || "").toLowerCase().indexOf(String(q).toLowerCase()) >= 0;
+		}
+		
+		/* open filter area */
+		$("#btnToggleAdvanced").on("click", function(){ fnOpenFilterArea(!state.advancedOpen); });
+		
+	    function fnOpenFilterArea(open){
+  			state.advancedOpen = !!open;
+  			$("#advancedWrap").toggleClass("open", state.advancedOpen);
+  			$("#btnToggleAdvanced").attr("aria-expanded", String(state.advancedOpen));
+  			$("#advancedBtnText").text(state.advancedOpen ? "접기" : "펼치기");
+  	    }
+	    
+		/* filter - source */
 		fnRefreshSourceOption();
 		function fnRefreshSourceOption(){
 			const $filterSource = $('#filter-source');
@@ -341,550 +468,305 @@
 				}
 	        });
 		}
+		
+		/* paging */
+    	$("#pager").on("click", "button", function(){
+  			let act = $(this).data("act");
+  	        if(act === "prev" && state.page > 1) state.page--;
+  	        if(act === "next") state.page++;
+  	        render();
+  		});
+		
+		/* each item + detail modal + edit modal */
+		let detailState = {
+	    		currentId	: null
+	    		, editing	: false
+	    };
+		
+		$("#list").on("click", ".item", function(){ fnOpenDetailModalById($(this).data("id")); });
+		
+		// find a word data by id
+		function fnFindWordById(id){
+  			for(let i = 0; i < words.length; i++){
+  	    		if(words[i].vocabularyUid == id) return words[i];
+  			}
+  			return null;
+  	    }
+		
+		// open detail modal
+	    function fnOpenDetailModalById(id){
+  	    	let w = fnFindWordById(id);
+  	      	if(!w) return;
+
+  			detailState.currentId = id;
+  	      	fnSetWordDataIntoDetailAndEditModal(w);
+  	      	fnSetDetailMode(false);
+
+  	      	$("#modal").addClass("open");
+  	      	syncBodyModalState();
+  	    }
+		
+	    function fnSetWordDataIntoDetailAndEditModal(w){
+  	      	$("#mEnglish").text(w.english);
+  	      	$("#mRegistrationDate").text("추가일 : " + w.registrationDate);
+  	      	$("#mKorean").text(w.korean);
+  	      	$("#mExample").text(w.example);
+  	      	$("#mSource").text(w.source);
+  	      
+  	      	$("#eEnglish").val(w.english);
+  	      	$("#eKorean").val(w.korean);
+  	      	$("#eExample").val(w.example);
+  	      	$("#eSource").val(w.source);
+  	    }
+
+	    /* edit modal */
+		$("#btn-open-edit").on("click", function(){
+  			let w = detailState.currentId ? fnFindWordById(detailState.currentId) : null;
+  	        if(!w) return;
+  	        fnSetDetailMode(true);
+  		});
+		
+	    function fnSetDetailMode(editing){
+  			detailState.editing = !!editing;
+  			if(detailState.editing){
+  	        	$("#detailView").hide();
+  	        	$("#detailEdit").show();
+  	        	setTimeout(function(){ $("#eWord").trigger("focus"); }, 0);
+  	      	}else{
+  	        	$("#detailEdit").hide();
+  	        	$("#detailView").show();
+  	      	}
+  	    }
+	    
+	    $("#btn-close-edit").on("click", closeDetailModal);
+	    
+	    function closeDetailModal(){
+  			$("#modal").removeClass("open");
+  	      	detailState.currentId = null;
+  	      	fnSetDetailMode(false);
+  	      	syncBodyModalState();
+  	    }
+	    
+	    $("#btn-edit").on("click", fnEditWord);
+	    
+	    function fnEditWord(){
+  			if(!detailState.currentId) return;
+  	      	var w = fnFindWordById(detailState.currentId);
+  	      	if(!w) return;
+
+	    	let data = {
+	    			vocabularyUid	: detailState.currentId
+	    			, english 		: $.trim($('#eEnglish').val())
+	    			, korean 		: $.trim($('#eKorean').val())
+	    			, example		: $.trim($('#eExample').val())
+	    			, source		: $.trim($('#eSource').val())
+	    	}
+	    	
+	    	// validation
+	    	if(isEmpty(data.english)){
+	    		alert('영어 단어를 입력하세요.'); return
+	    	}
+	    	if(isEmpty(data.korean)){
+	    		alert('한글 뜻을 입력하세요.'); return
+	    	}
+
+  	      	let newWordLower = data.english.toLowerCase();
+  	      	let oldWordLower = String(w.english || "").toLowerCase();
+  	      	let changed = newWordLower !== oldWordLower;
+
+  			if(changed){
+  				let exists = words.some(function(x){
+  	          		if(x.vocabularyUid === w.vocabularyUid) return false;
+  	          			return String(x.english || "").toLowerCase() === newWordLower;
+  	        		});
+  	        	if(exists){
+  	          		let ok = confirm("같은 단어가 이미 존재합니다. 그래도 저장할까요?");
+  	          		if(!ok) return;
+  	        	}
+  	      	}
+  			
+			// send data 
+			$.ajax({
+	            type			: 'post'
+	            , url			: getFullPath('/vocabulary/edit')
+	            , contentType	: 'application/json'
+	            , data			: JSON.stringify(data)
+				, success		: function(response){
+					if(response.resultCode != 1){
+						alert(response.resultMessage);
+					}else{
+			  	     	w.english 	= data.english;
+			  	      	w.korean 	= data.korean;
+			  	      	w.example 	= data.example;
+			  	      	w.source 	= data.source;
+
+			  	      	render();
+
+			  	      	fnSetWordDataIntoDetailAndEditModal(w);
+						fnSetDetailMode(false);		
+					}
+				}
+			});
+  	    }
+	    
+	    /* delete word */
+		$('#btn-delete').on("click", () => {
+			if(confirm('단어를 삭제하시겠습니까?')){
+				// send data 
+				$.ajax({
+		            type			: 'post'
+		            , url			: getFullPath('/vocabulary/delete')
+		            , contentType	: 'application/json'
+		            , data			: JSON.stringify({vocabularyUid : detailState.currentId})
+					, success		: function(response){
+						if(response.resultCode != 1){
+							alert(response.resultMessage);
+						}else{
+				          	words = words.filter(function(w){
+								return w.vocabularyUid !== detailState.currentId;
+				            });
+				  	      	render();
+				  	      	closeDetailModal();
+						}
+					}
+				});
+			}
+		});
+		//---------------------------------------------------
+
+
+	    	    var MOBILE_BREAKPOINT = 980;
+	    	    var mq = window.matchMedia("(max-width: " + MOBILE_BREAKPOINT + "px)");
+
+	    	    function uniq(arr){
+	    	      var set = {};
+	    	      var out = [];
+	    	      for (var i=0;i<arr.length;i++){
+	    	        var v = arr[i];
+	    	        if(!v) continue;
+	    	        if(!set[v]){
+	    	          set[v] = true;
+	    	          out.push(v);
+	    	        }
+	    	      }
+	    	      return out;
+	    	    }
+
+	    	    function setAddFormMobile(values){
+	    	      $("#mAddWord").val(values && values.word ? values.word : "");
+	    	      $("#mAddMeaning").val(values && values.meaning ? values.meaning : "");
+	    	      $("#mAddExample").val(values && values.example ? values.example : "");
+	    	      $("#mAddSource").val(values && values.source ? values.source : "");
+	    	    }
+
+
+
+	    	    function isDrawerVisible(){
+	    	      return $("#drawer").hasClass("open") || $("#drawer").hasClass("closing");
+	    	    }
+
+	    	    function updateFabVisibility(){
+	    	      var isMobile = mq.matches;
+	    	      var anyOverlayOpen =
+	    	        $("#modal").hasClass("open") ||
+	    	        $("#modal-new-word").hasClass("open") ||
+	    	        isDrawerVisible();
+
+	    	      if(!isMobile){
+	    	        $("#btn-floating").prop("hidden", true);
+	    	        return;
+	    	      }
+	    	      $("#btn-floating").prop("hidden", anyOverlayOpen);
+	    	    }
+
+	    	    function syncBodyModalState(){
+	    	      var anyOpen =
+	    	        $("#modal").hasClass("open") ||
+	    	        $("#modal-new-word").hasClass("open") ||
+	    	        isDrawerVisible();
+	    	      $("body").toggleClass("modal-open", anyOpen);
+	    	      //updateFabVisibility();
+	    	    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	    	    function validateEditPayload(payload){
+	    	      var word = $.trim(payload.word || "");
+	    	      var meaning = $.trim(payload.meaning || "");
+	    	      var example = $.trim(payload.example || "");
+	    	      var source = $.trim(payload.source || "");
+
+	    	      var missing = [];
+	    	      if(!word) missing.push("영어 단어");
+	    	      if(!meaning) missing.push("한글 뜻");
+	    	      if(!example) missing.push("예문");
+	    	      if(!source) missing.push("출처");
+
+	    	      if(missing.length){
+	    	        alert("다음 항목을 입력해 주세요: " + missing.join(", "));
+	    	        return null;
+	    	      }
+	    	      return { word: word, meaning: meaning, example: example, source: source };
+	    	    }
+
+
+
+	    	    
+	    	//----------
+	    	
+	    	      render();
+	    	      syncBodyModalState();
+
+	    	      // background click disabled intentionally
+	    	      $("#drawerBackdrop").on("click", function(){ /* no-op */ });
+
+
+	    	      $("#menuToggleFilters").on("click", function(){ setAdvancedOpen(!state.advancedOpen); });
+	    	      $("#menuOpenAdd").on("click", function(){
+	    	        setTimeout(function(){
+	    	          if(mq.matches) fnOpenNewWordModal();
+	    	          else{
+	    	            $("#english").trigger("focus");
+	    	            $("html, body").animate({ scrollTop: $("#addPanel").offset().top - 16 }, 180);
+	    	          }
+	    	        }, 0);
+	    	      });
+
+	    	     
+
+
+
+
+	    	      $("#btnEditCancel").on("click", function(){
+	    	        var w2 = detailState.currentId ? fnFindWordById(detailState.currentId) : null;
+	    	        fnSetDetailMode(false);
+	    	      });
+	    	      
+
+	    	      
+	    	      $("#btnClearAdd").on("click", function(){
+	    	        setAddFormDesktop({});
+	    	        $("#englsih").trigger("focus");
+	    	      });
+
+
+		
 	})
-	
-	
  </script>	
-
-	<script>
-	
-    function setSourceOptions(){
-        var sources = uniq(words.map(function(w){ return w.source; })).sort(function(a,b){ return String(a).localeCompare(String(b)); });
-        var current = state.source;
-
-        var html = '<option value="">전체</option>';
-        for (var i=0;i<sources.length;i++){
-          var s = sources[i];
-          html += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>';
-        }
-        $("#filter-source").html(html);
-
-        if(sources.indexOf(current) >= 0){
-          $("#filter-source").val(current);
-        }else{
-          $("#filter-source").val("");
-        }
-	}
-
-    var state = {
-      q: "",
-      source: "",
-      sort: "recent",
-      exampleOnly: "",
-      page: 1,
-      pageSize: 6,
-      advancedOpen: false
-    };
-
-    var detailState = {
-      currentId: null,
-      editing: false
-    };
-
-    var MOBILE_BREAKPOINT = 980;
-    var mq = window.matchMedia("(max-width: " + MOBILE_BREAKPOINT + "px)");
-
-    function uniq(arr){
-      var set = {};
-      var out = [];
-      for (var i=0;i<arr.length;i++){
-        var v = arr[i];
-        if(!v) continue;
-        if(!set[v]){
-          set[v] = true;
-          out.push(v);
-        }
-      }
-      return out;
-    }
-
-    function formatDate(ts){
-      var d = new Date(ts);
-      var yyyy = d.getFullYear();
-      var mm = String(d.getMonth()+1).padStart(2,"0");
-      var dd = String(d.getDate()).padStart(2,"0");
-      var hh = String(d.getHours()).padStart(2,"0");
-      var mi = String(d.getMinutes()).padStart(2,"0");
-      return yyyy + "-" + mm + "-" + dd + " " + hh + ":" + mi;
-    }
-
-    function includesCI(hay, needle){
-      if(!needle) return true;
-      return String(hay || "").toLowerCase().indexOf(String(needle).toLowerCase()) >= 0;
-    }
-
-    function escapeHtml(str){
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-
-
-    function setAddFormMobile(values){
-      $("#mAddWord").val(values && values.word ? values.word : "");
-      $("#mAddMeaning").val(values && values.meaning ? values.meaning : "");
-      $("#mAddExample").val(values && values.example ? values.example : "");
-      $("#mAddSource").val(values && values.source ? values.source : "");
-    }
-
-    function resetAddModalForm(){
-      setAddFormMobile({});
-    }
-
-    function findWordById(id){
-      for (var i=0;i<words.length;i++){
-    	  if(words[i].vocabularyUid == id) return words[i];
-      }
-      return null;
-    }
-
-    function isDrawerVisible(){
-      return $("#drawer").hasClass("open") || $("#drawer").hasClass("closing");
-    }
-
-    function updateFabVisibility(){
-      var isMobile = mq.matches;
-      var anyOverlayOpen =
-        $("#modal").hasClass("open") ||
-        $("#addModal").hasClass("open") ||
-        isDrawerVisible();
-
-      if(!isMobile){
-        $("#fabAdd").prop("hidden", true);
-        return;
-      }
-      $("#fabAdd").prop("hidden", anyOverlayOpen);
-    }
-
-    function syncBodyModalState(){
-      var anyOpen =
-        $("#modal").hasClass("open") ||
-        $("#addModal").hasClass("open") ||
-        isDrawerVisible();
-      $("body").toggleClass("modal-open", anyOpen);
-      //updateFabVisibility();
-    }
-
-    function setAdvancedOpen(open){
-      state.advancedOpen = !!open;
-      $("#advancedWrap").toggleClass("open", state.advancedOpen);
-      $("#btnToggleAdvanced").attr("aria-expanded", String(state.advancedOpen));
-      $("#advancedBtnText").text(state.advancedOpen ? "접기" : "펼치기");
-    }
-
-    /* =========================
-       Drawer open/close with close animation
-       - close 시 open을 즉시 제거하면 visibility가 숨겨지며 "뚝" 사라지는 문제가 발생
-       - open -> closing 전환하여 애니메이션 진행 후, transition 종료 시 완전 hidden 처리
-    ========================= */
-    function openDrawer(){
-      var $d = $("#drawer");
-      // 닫히는 중이라도 즉시 다시 열 수 있도록 상태 정리
-      $d.removeClass("closing").addClass("open").attr("aria-hidden", "false");
-      syncBodyModalState();
-      setTimeout(function(){ $("#btnDrawerClose").trigger("focus"); }, 0);
-    }
-
-    function finalizeDrawerClose(){
-      var $d = $("#drawer");
-      $d.removeClass("closing").attr("aria-hidden", "true");
-      syncBodyModalState();
-      setTimeout(function(){ $("#btnMenu").trigger("focus"); }, 0);
-    }
-
-    function closeDrawer(){
-      var $d = $("#drawer");
-      if(!$d.hasClass("open")) return;
-
-      // 애니메이션을 위해 closing 상태로 전환
-      $d.removeClass("open").addClass("closing").attr("aria-hidden", "true");
-      syncBodyModalState();
-
-      // transitionend를 놓치거나 브라우저 이슈 대비: fallback 타이머
-      var fallbackMs = Math.max(parseInt(getComputedStyle(document.documentElement).getPropertyValue("--drawer-dur")) || 260,
-                                parseInt(getComputedStyle(document.documentElement).getPropertyValue("--fade-dur")) || 220) + 80;
-
-      window.clearTimeout(closeDrawer._t);
-      closeDrawer._t = window.setTimeout(function(){
-        if($("#drawer").hasClass("closing")) finalizeDrawerClose();
-      }, fallbackMs);
-    }
-
-    function applyResponsive(){
-      var isMobile = mq.matches;
-      $("#addPanel").css("display", isMobile ? "none" : "");
-      syncBodyModalState();
-
-      if(!isMobile && $("#addModal").hasClass("open")){
-        closeAddModal();
-      }
-    }
-
-    function getFiltered(){
-      var q = String(state.q || "").trim();
-      var exampleOnly = String(state.exampleOnly || "").trim();
-
-      var out = words.slice();
-
-      if(state.source){
-        out = out.filter(function(w){ return w.source === state.source; });
-      }
-
-      if(q){
-        out = out.filter(function(w){
-          return includesCI(w.word, q) ||
-                 includesCI(w.meaning, q) ||
-                 includesCI(w.example, q) ||
-                 includesCI(w.source, q);
-        });
-      }
-
-      if(exampleOnly){
-        out = out.filter(function(w){ return includesCI(w.example, exampleOnly); });
-      }
-
-      if(state.sort === "recent"){
-        out.sort(function(a,b){ return b.registrationDate - a.registrationDate; });
-      }else if(state.sort === "wordAsc"){
-        out.sort(function(a,b){ return String(a.english).localeCompare(String(b.english)); });
-      }else if(state.sort === "wordDesc"){
-        out.sort(function(a,b){ return String(b.english).localeCompare(String(a.english)); });
-      }
-
-      return out;
-    }
-
-
-
-    function render(){
-      var filtered = getFiltered();
-      var total = filtered.length;
-
-      var totalPages = Math.max(1, Math.ceil(total / state.pageSize));
-      state.page = Math.min(state.page, totalPages);
-
-      var start = (state.page - 1) * state.pageSize;
-      var pageItems = filtered.slice(start, start + state.pageSize);
-
-      $("#statText").text(total + " items · page " + state.page + "/" + totalPages);
-
-      if(pageItems.length === 0){
-        $("#list").html('<div class="hint">조건에 맞는 결과가 없습니다. 검색어/필터를 조정하세요.</div>');
-      }else{
-        var listHtml = "";
-        for (var i=0;i<pageItems.length;i++){
-          var w = pageItems[i];
-          listHtml += ''
-            + '<div class="item" data-id="' + w.vocabularyUid + '" tabindex="0" role="button" aria-label="단어 상세 열기">'
-            +   '<div class="badge">WORD</div>'
-            +   '<div class="meta">'
-            +     '<div class="topline">'
-            +       '<div class="word">' + escapeHtml(w.english) + '</div>'
-            +       '<div class="meaning">' + escapeHtml(w.korean) + '</div>'
-            +     '</div>'
-            +     '<div class="example">' + escapeHtml(w.example) + '</div>'
-            +     '<div class="source">'
-            +       '<span class="chip">' + escapeHtml(w.source) + '</span>'
-            +       '<span class="chip">추가: ' + escapeHtml(formatDate(w.registrationDate)) + '</span>'
-            +     '</div>'
-            +   '</div>'
-            + '</div>';
-        }
-        $("#list").html(listHtml);
-      }
-
-      $("#pager").html(
-        '<button type="button" ' + (state.page <= 1 ? "disabled" : "") + ' data-act="prev">이전</button>'
-        + '<span>' + state.page + " / " + totalPages + '</span>'
-        + '<button type="button" ' + (state.page >= totalPages ? "disabled" : "") + ' data-act="next">다음</button>'
-      );
-    }
-
-    function setDetailMode(editing){
-      detailState.editing = !!editing;
-      if(detailState.editing){
-        $("#detailView").hide();
-        $("#detailEdit").show();
-        setTimeout(function(){ $("#eWord").trigger("focus"); }, 0);
-      }else{
-        $("#detailEdit").hide();
-        $("#detailView").show();
-      }
-    }
-
-    function hydrateDetailView(w){
-      $("#mWord").text(w.word);
-      $("#mMeta").text("추가일: " + formatDate(w.createdAt));
-      $("#mMeaning").text(w.meaning);
-      $("#mExample").text(w.example);
-      $("#mSource").text(w.source);
-    }
-
-    function hydrateDetailEdit(w){
-      $("#eWord").val(w.word);
-      $("#eMeaning").val(w.meaning);
-      $("#eExample").val(w.example);
-      $("#eSource").val(w.source);
-    }
-
-    function openModalById(id){
-      console.log(id);
-    	var w = findWordById(id);
-      console.log(w);
-      if(!w) return;
-
-      detailState.currentId = id;
-      hydrateDetailView(w);
-      hydrateDetailEdit(w);
-      setDetailMode(false);
-
-      $("#modal").addClass("open");
-      syncBodyModalState();
-    }
-
-    function closeDetailModal(){
-      $("#modal").removeClass("open");
-      detailState.currentId = null;
-      setDetailMode(false);
-      syncBodyModalState();
-    }
-
-    function validateEditPayload(payload){
-      var word = $.trim(payload.word || "");
-      var meaning = $.trim(payload.meaning || "");
-      var example = $.trim(payload.example || "");
-      var source = $.trim(payload.source || "");
-
-      var missing = [];
-      if(!word) missing.push("영어 단어");
-      if(!meaning) missing.push("한글 뜻");
-      if(!example) missing.push("예문");
-      if(!source) missing.push("출처");
-
-      if(missing.length){
-        alert("다음 항목을 입력해 주세요: " + missing.join(", "));
-        return null;
-      }
-      return { word: word, meaning: meaning, example: example, source: source };
-    }
-
-    function saveDetailEdits(){
-      if(!detailState.currentId) return;
-      var w = findWordById(detailState.currentId);
-      if(!w) return;
-
-      var v = validateEditPayload({
-        word: $("#eWord").val(),
-        meaning: $("#eMeaning").val(),
-        example: $("#eExample").val(),
-        source: $("#eSource").val()
-      });
-      if(!v) return;
-
-      var newWordLower = v.word.toLowerCase();
-      var oldWordLower = String(w.word || "").toLowerCase();
-      var changed = newWordLower !== oldWordLower;
-
-      if(changed){
-        var exists = words.some(function(x){
-          if(x.id === w.id) return false;
-          return String(x.word || "").toLowerCase() === newWordLower;
-        });
-        if(exists){
-          var ok = confirm("같은 단어가 이미 존재합니다. 그래도 저장할까요?");
-          if(!ok) return;
-        }
-      }
-
-      w.word = v.word;
-      w.meaning = v.meaning;
-      w.example = v.example;
-      w.source = v.source;
-
-      render();
-
-      hydrateDetailView(w);
-      hydrateDetailEdit(w);
-
-      $("#pillText").text("1 item updated (demo)");
-      setDetailMode(false);
-    }
-
-    function openAddModal(){
-      if($.trim($("#english").val())){
-        setAddFormMobile({
-          word: $("#english").val(),
-          meaning: $("#korean").val(),
-          example: $("#example").val(),
-          source: $("#source").val()
-        });
-      }
-      $("#addModal").addClass("open");
-      syncBodyModalState();
-      setTimeout(function(){ $("#mAddWord").trigger("focus"); }, 0);
-    }
-
-    function closeAddModal(){
-      resetAddModalForm();
-      $("#addModal").removeClass("open");
-      syncBodyModalState();
-    }
-
-    function applyFilters(){
-      state.q = $("#q").val();
-      state.source = $("#filter-source").val();
-      state.sort = $("#sort").val();
-      state.exampleOnly = $("#exampleOnly").val();
-      state.page = 1;
-      render();
-    }
-
-    function validateWordPayload(payload){
-      var word = $.trim(payload.word || "");
-      var meaning = $.trim(payload.meaning || "");
-      var example = $.trim(payload.example || "");
-      var source = $.trim(payload.source || "");
-
-      var missing = [];
-      if(!word) missing.push("영어 단어");
-      if(!meaning) missing.push("한글 뜻");
-      if(!example) missing.push("예문");
-      if(!source) missing.push("출처");
-
-      if(missing.length){
-        alert("다음 항목을 입력해 주세요: " + missing.join(", "));
-        return null;
-      }
-      return { word: word, meaning: meaning, example: example, source: source };
-    }
-
-    function submitAddFromMobile(){
-      var ok = addWordToList({
-        word: $("#mAddWord").val(),
-        meaning: $("#mAddMeaning").val(),
-        example: $("#mAddExample").val(),
-        source: $("#mAddSource").val()
-      });
-      if(ok){
-        setAddFormMobile({});
-        closeAddModal();
-      }
-    }
-
-    $(function(){
-
-      render();
-      setAdvancedOpen(false);
-      applyResponsive();
-      syncBodyModalState();
-
-      $("#btnMenu").on("click", openDrawer);
-      $("#btnDrawerClose").on("click", closeDrawer);
-
-      // background click disabled intentionally
-      $("#drawerBackdrop").on("click", function(){ /* no-op */ });
-
-      // 닫힘 애니메이션 종료 시점에 완전 hidden 처리 (panel transform transition 기준)
-      $("#drawer").find(".drawer-panel").on("transitionend", function(e){
-        // transform transition이 끝났고, closing 상태라면 finalize
-        if(e.originalEvent && e.originalEvent.propertyName !== "transform") return;
-        if($("#drawer").hasClass("closing")) finalizeDrawerClose();
-      });
-
-      $("#menuFocusSearch").on("click", function(){
-        closeDrawer();
-        setTimeout(function(){ $("#q").trigger("focus"); }, 0);
-      });
-      $("#menuToggleFilters").on("click", function(){ setAdvancedOpen(!state.advancedOpen); });
-      $("#menuOpenAdd").on("click", function(){
-        closeDrawer();
-        setTimeout(function(){
-          if(mq.matches) openAddModal();
-          else{
-            $("#english").trigger("focus");
-            $("html, body").animate({ scrollTop: $("#addPanel").offset().top - 16 }, 180);
-          }
-        }, 0);
-      });
-
-      $("#btnApply").on("click", applyFilters);
-      $("#btnToggleAdvanced").on("click", function(){ setAdvancedOpen(!state.advancedOpen); });
-
-      $("#q, #exampleOnly").on("keydown", function(e){
-        if(e.key === "Enter"){ e.preventDefault(); applyFilters(); }
-      });
-
-      $("#filter-source").on("change", applyFilters);
-      $("#sort").on("change", applyFilters);
-
-      $("#list")
-        .on("click", ".item", function(){ openModalById($(this).data("id")); })
-        .on("keydown", ".item", function(e){
-          if(e.key === "Enter" || e.key === " "){
-            e.preventDefault();
-            openModalById($(this).data("id"));
-          }
-        });
-
-      $("#pager").on("click", "button", function(){
-        var act = $(this).data("act");
-        if(act === "prev" && state.page > 1) state.page--;
-        if(act === "next") state.page++;
-        render();
-      });
-
-      $("#mClose").on("click", closeDetailModal);
-      $("#modal").on("click", function(e){
-        if(e.target === this) closeDetailModal();
-      });
-
-      $("#btnEdit").on("click", function(){
-        var w = detailState.currentId ? findWordById(detailState.currentId) : null;
-        if(!w) return;
-        hydrateDetailEdit(w);
-        setDetailMode(true);
-      });
-      $("#btnEditCancel").on("click", function(){
-        var w2 = detailState.currentId ? findWordById(detailState.currentId) : null;
-        if(w2) hydrateDetailEdit(w2);
-        setDetailMode(false);
-      });
-      $("#btnEditSave").on("click", saveDetailEdits);
-
-      
-      $("#btnClearAdd").on("click", function(){
-        setAddFormDesktop({});
-        $("#englsih").trigger("focus");
-      });
-
-      $("#fabAdd").on("click", openAddModal);
-
-      $("#addClose").on("click", function(){ closeAddModal(); });
-      $("#addModal").on("click", function(e){
-        if(e.target === this){
-          // no-op (background click disabled)
-        }
-      });
-
-      $("#mAddClear").on("click", function(){
-        setAddFormMobile({});
-        $("#mAddWord").trigger("focus");
-      });
-      $("#mAddSubmit").on("click", submitAddFromMobile);
-
-      // Responsive
-      if(typeof mq.addEventListener === "function"){
-        mq.addEventListener("change", applyResponsive);
-      }else{
-        mq.addListener(applyResponsive);
-      }
-      $(window).on("resize", applyResponsive);
-    });
-  </script>
 </c:set>
 
 <%@ include file="/WEB-INF/jsp/common/layout.jsp"%>

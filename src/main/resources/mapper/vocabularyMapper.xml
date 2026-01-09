@@ -53,4 +53,23 @@
 		    , #{userUid}
 		)
 	</insert>
+	
+	<update id="updateVocabulary">
+		/* vocabularyMapper.updateVocabulary */
+		UPDATE VOCABULARY
+		SET
+			ENGLISH 	= #{english}
+			, KOREAN 	= #{korean}
+			, EXAMPLE	= #{example}
+			, SOURCE	= #{source}
+		WHERE
+			VOCABULARY_UID = #{vocabularyUid}
+	</update>
+	
+	<delete id="deleteVocabulary">
+		/* vocabularyMapper.deleteVocabulary */
+		DELETE FROM VOCABULARY
+		WHERE
+			VOCABULARY_UID = #{vocabularyUid}
+	</delete>
 </mapper>
