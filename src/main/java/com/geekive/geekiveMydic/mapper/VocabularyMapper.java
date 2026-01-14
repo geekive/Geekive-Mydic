@@ -8,6 +8,7 @@ import com.geekive.geekiveMydic.geekiveCustom.GeekiveMap;
 
 @Mapper
 public interface VocabularyMapper {
+	public GeekiveMap selectWordOfTheDay();
 	public List<GeekiveMap> selectVocabularyList(GeekiveMap gMap);
 	public List<GeekiveMap> selectSourceList(GeekiveMap gMap);
 	public void insertVocabulary(GeekiveMap gMap);

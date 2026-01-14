@@ -20,6 +20,11 @@ public class VocabularyService implements VocabularyMapper{
 	VocabularyMapper vocabularyMapper;
 
 	@Override
+	public GeekiveMap selectWordOfTheDay() {
+		return vocabularyMapper.selectWordOfTheDay();
+	}
+
+	@Override
 	public List<GeekiveMap> selectVocabularyList(GeekiveMap gMap) {
 		return vocabularyMapper.selectVocabularyList(gMap);
 	}

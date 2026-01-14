@@ -53,6 +53,3 @@ spring.security.user.roles=yourRole
 
 # encryption key
 encryption.secretKey=yourSecretKey
-
-# jwt key
-jwt.secretkey=yourSecretKey

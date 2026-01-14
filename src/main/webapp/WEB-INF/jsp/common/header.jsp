@@ -22,15 +22,15 @@
 					<span id="pillText">${sessionScope.userMap.name}</span>
 				</div>
 				<div class="pill" id="btn-signout">
-					로그아웃
+					Sign out
 				</div>
 			</c:when>
 			<c:otherwise>
 				<div class="pill" id="btn-signin-open" role="button" tabindex="0" aria-label="로그인 열기">
-					로그인
+					Sign in
 				</div>
 				<div class="pill" id="btn-signup-open" role="button" tabindex="0" aria-label="회원가입 열기">
-					회원가입
+					Sing up
 				</div>
 			</c:otherwise>
 		</c:choose>
@@ -61,6 +61,12 @@
 								<div class="t">My vocabulary list</div>
 							</div>
 						</button>
+						
+						<button type="button" onclick="goToPage('/vocabulary/quiz')">
+							<div class="k">
+								<div class="t">My vocabulary quiz</div>
+							</div>
+						</button>
 		
 						<button type="button" id="">
 							<div class="k">
@@ -82,11 +88,11 @@
 	<div class="modal-card sign-card">
 		<div class="modal-b">
 			<form id="loginForm" class="auth-form" autocomplete="on">
-				<label> 이메일 <input id="signin-email" type="text" inputmode="email" autocomplete="off"  placeholder="example@domain.com"></label>
-				<label> 패스워드 <input id="signin-password" type="password" autocomplete="off" placeholder="********"></label>
+				<label> E-mail <input id="signin-email" type="text" inputmode="email" autocomplete="off"  placeholder="example@domain.com"></label>
+				<label> Password <input id="signin-password" type="password" autocomplete="off" placeholder="********"></label>
 				<div class="modal-actions">
-					<button class="btn primary" id="btn-signin-save" type="submit">로그인</button>
-					<button class="close" id="btn-signin-close" type="button">닫기</button>
+					<button class="btn primary" id="btn-signin-save" type="submit">Sign in</button>
+					<button class="close" id="btn-signin-close" type="button">Clsoe</button>
 				</div>
 			</form>
 		</div>
@@ -97,25 +103,25 @@
 <div class="modal" id="modal-signup" role="dialog" aria-modal="true" aria-label="로그인">
 	<div class="modal-card sign-card">
 		<div class="modal-b">
-			<label> 이름 <input id="signup-name" type="text" placeholder="Robin" autocomplete="off" oninput="this.value = this.value.trim();" maxlength="10"></label>
-			<label> 이메일 
+			<label> Name <input id="signup-name" type="text" placeholder="Robin" autocomplete="off" oninput="this.value = this.value.trim();" maxlength="10"></label>
+			<label> E-mail 
 				<div style="display: flex; flex-direction: row; justify-content: space-between;">
 					<input id="signup-email" type="text" inputmode="email" autocomplete="off" placeholder="example@domain.com" style="width: 80%;" oninput="this.value = this.value.trim();" maxlength="30">
-					<button class="btn primary" id="btn-code" type="button">인증 발송</button>
+					<button class="btn primary" id="btn-code" type="button">Send code</button>
 				</div>
 			</label>
-			<label> 인증번호
+			<label> Code
 				<div style="display: flex; flex-direction: row; justify-content: space-between;">
 					<input id="signup-code" type="text" placeholder="123456" style="width: 80%;" disabled="disabled" maxlength="6" oninput="this.value = this.value.trim();">
-					<button class="btn primary" id="btn-code-check" type="button" disabled="disabled">인증 확인</button>
+					<button class="btn primary" id="btn-code-check" type="button" disabled="disabled">Check code</button>
 				</div>
 			</label>
-			<label> 패스워드 <input id="signup-password" type="password" autocomplete="current-password" placeholder="********" disabled="disabled" oninput="this.value = this.value.trim();"></label>
-			<label> 패스워드 확인 <input id="signup-password-check" type="password" autocomplete="current-password" placeholder="********" disabled="disabled" oninput="this.value = this.value.trim();"></label>
+			<label> Password <input id="signup-password" type="password" autocomplete="current-password" placeholder="********" disabled="disabled" oninput="this.value = this.value.trim();"></label>
+			<label> Password Check <input id="signup-password-check" type="password" autocomplete="current-password" placeholder="********" disabled="disabled" oninput="this.value = this.value.trim();"></label>
 			
 			<div class="modal-actions">
-				<button class="btn primary" id="btn-signup-save" type="button" disabled="disabled">회원가입</button>
-				<button class="close" id="btn-singup-close" type="button">닫기</button>
+				<button class="btn primary" id="btn-signup-save" type="button" disabled="disabled">Sing up</button>
+				<button class="close" id="btn-singup-close" type="button">Close</button>
 			</div>
 		</div>
 	</div>
@@ -188,16 +194,20 @@
 		
 		function fnSingin(){
 			let email = $signinEmail.val();
-			if(isEmpty(email)){
-				alert('이메일을 입력하세요.'); return
+			if (isEmpty(email)) {
+			    alert('Please enter your email address.');
+			    return;
 			}
-			if(!isEmailFormat(email)){
-				alert('이메일 형식이 아닙니다.'); return
+
+			if (!isEmailFormat(email)) {
+			    alert('Please enter a valid email address.');
+			    return;
 			}
-			
+
 			let password = $signinPassword.val();
-			if(isEmpty(password)){
-				alert('패스워드를 입력하세요.'); return
+			if (isEmpty(password)) {
+			    alert('Please enter your password.');
+			    return;
 			}
 
 			let data = {
@@ -217,6 +227,7 @@
 					if(response.resultCode == 1){
 						location.reload();
 					}else{
+						alert('Please check your email or password.');
 						$btnSigninSave.prop('disabled', false);
 					}
 				}
@@ -265,11 +276,14 @@
 		
 		function fnSendCode(){
 			let email = $signupEmail.val();
-			if(isEmpty(email)){
-				alert('이메일을 입력하세요.'); return
+			if (isEmpty(email)) {
+			    alert('Please enter your email address.');
+			    return;
 			}
-			if(!isEmailFormat(email)){
-				alert('이메일 형식이 아닙니다.'); return
+
+			if (!isEmailFormat(email)) {
+			    alert('Please enter a valid email address.');
+			    return;
 			}
 			
 			$.ajax({
@@ -304,7 +318,7 @@
 											$signupPasswordCheck.prop('disabled', false);
 											$btnSignupSave.prop('disabled', false);
 										}else{
-											alert('인증번호가 일치하지 않습니다.');
+											alert('The verification code does not match.');
 										}
 									})
 								}else{
@@ -321,30 +335,38 @@
 		
 		function fnSignup(){
 			let name = $singupName.val();
-			if(isEmpty(name)){
-				alert('이름을 입력하세요.'); return
+			if (isEmpty(name)) {
+			    alert('Please enter your name.');
+			    return;
 			}
+
 			let flagName = /^.{3,}$/.test(name);
-			if(!flagName){
-				alert('이름은 최소 3자 이상입니다.'); return
+			if (!flagName) {
+			    alert('Name must be at least 3 characters long.');
+			    return;
 			}
-			
+
 			let email = $signupEmail.val();
-			if(isEmpty(email)){
-				alert('이메일 데이터가 손상됐습니다. 회원가입을 다시 진행하세요.'); return
+			if (isEmpty(email)) {
+			    alert('Email data is invalid. Please restart the sign-up process.');
+			    return;
 			}
-			
+
 			let password = $signupPassword.val();
-			if(isEmpty(password)){
-				alert('패스워드를 입력하세요.'); return
+			if (isEmpty(password)) {
+			    alert('Please enter your password.');
+			    return;
 			}
-			
+
 			let flagPassword = /^.{8,}$/.test(password);
-			if(!flagPassword){
-				alert('패스워드는 최소 8자 이상입니다.'); return
+			if (!flagPassword) {
+			    alert('Password must be at least 8 characters long.');
+			    return;
 			}
-			if(password != $signupPasswordCheck.val()){
-				alert('패스워드 확인이 일치하지 않습니다.'); return
+
+			if (password !== $signupPasswordCheck.val()) {
+			    alert('Password confirmation does not match.');
+			    return;
 			}
 			
 			let data = {

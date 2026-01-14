@@ -6,15 +6,9 @@
 </jsp:include>
 
 <body>
-<%-- 	<input type="hidden" id="contextPath" value="${contextPath}">
-	
-	<jsp:include page="/WEB-INF/jsp/common/modal.jsp"/>
-	<jsp:include page="/WEB-INF/jsp/common/loading.jsp"/> --%>
-
 	<div class="wrap">
 		<jsp:include page="/WEB-INF/jsp/common/header.jsp"/>	
 		<c:out value="${pageContent}" escapeXml="false"/>
 	</div>
-	<%-- <jsp:include page="/WEB-INF/jsp/home/common/footer.jsp"/> --%>
 </body>
 </html>

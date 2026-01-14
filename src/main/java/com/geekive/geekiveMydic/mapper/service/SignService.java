@@ -31,11 +31,6 @@ public class SignService implements SignMapper{
 	}
 
 	@Override
-	public Boolean checkArchiveNameExistence(GeekiveMap gMap) {
-		return signMapper.checkArchiveNameExistence(gMap);
-	}
-
-	@Override
 	public GeekiveMap selectUser(GeekiveMap gMap) {
 		GeekiveMap userMap = null;
 		try {
@@ -59,10 +54,5 @@ public class SignService implements SignMapper{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void insertCategory(GeekiveMap gMap) {
-		signMapper.insertCategory(gMap);
 	}
 }

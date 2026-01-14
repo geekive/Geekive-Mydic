@@ -5,44 +5,56 @@
 	<main class="layout">
 		<div class="left-col">
 			<!-- search section :: s -->
-			<section class="card" aria-label="검색/필터">
+			<section class="card" aria-label="Search / Filter">
 				<div class="card-h">
-					<strong>검색</strong>
+					<strong>Search</strong>
 				</div>
 				<div class="card-b">
 					<div class="form">
 						<label>
-							통합 검색 (단어/뜻/예문/출처) 
-							<input id="q" type="text" placeholder="예: based on / 설레다 / TED" />
+							Unified Search (Word / Meaning / Example / Source)
+							<input id="q" type="text" placeholder="e.g. based on / excited / TED" />
 						</label>
-
+			
 						<div class="advanced-wrap" id="advancedWrap">
 							<div class="advanced-head">
 								<div class="left">
-									<div class="t">상세 필터</div>
+									<div class="t">Advanced Filters</div>
 								</div>
-								<button class="toggle" id="btnToggleAdvanced" type="button" aria-expanded="false" aria-controls="advancedBody">
-									<span id="advancedBtnText">펼치기</span>
+								<button
+									class="toggle"
+									id="btnToggleAdvanced"
+									type="button"
+									aria-expanded="false"
+									aria-controls="advancedBody"
+								>
+									<span id="advancedBtnText">Show</span>
 									<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                     					<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                   					</svg>
+										<path
+											d="M6 9l6 6 6-6"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										/>
+									</svg>
 								</button>
 							</div>
-
+			
 							<div class="advanced-body" id="advancedBody">
 								<div class="row">
 									<label>
-										출처 필터 
+										Source Filter
 										<select id="filter-source">
-											<option value="">전체</option>
+											<option value="">All</option>
 										</select>
-									</label> 
-									<label> 
-										정렬 
+									</label>
+									<label>
+										Sort
 										<select id="sort">
-											<option value="recent">최근 추가 순</option>
-											<option value="asc">단어 A→Z</option>
-											<option value="desc">단어 Z→A</option>
+											<option value="recent">Most Recent</option>
+											<option value="asc">Word A → Z</option>
+											<option value="desc">Word Z → A</option>
 										</select>
 									</label>
 								</div>
@@ -54,10 +66,10 @@
 			<!-- search section :: e -->
 
 			<!-- list section :: s -->
-			<section class="card" aria-label="단어 리스트">
+			<section class="card" aria-label="Word List">
 				<div class="card-h">
 					<div class="toolbar">
-						<strong>단어 리스트</strong>
+						<strong>Word List</strong>
 						<span class="stat" id="statText">0 items</span>
 					</div>
 				</div>
@@ -70,31 +82,37 @@
 		</div>
 
 		<!-- add new word :: s -->
-		<aside class="card" id="addPanel" aria-label="신규 단어 등록">
+		<aside class="card" id="addPanel" aria-label="Add New Word">
 			<div class="card-h">
-				<strong>단어 등록</strong>
-				<button class="btn" id="btnClearAdd" type="button" title="입력값 비우기">비우기</button>
+				<strong>Add New Word</strong>
 			</div>
 			<div class="card-b">
 				<div class="form">
-					<label> 
-						영어 단어 
+					<label>
+						English Word
 						<input id="english" type="text" placeholder="based on" />
-					</label> 
-					<label> 
-						한글 뜻 
-						<input id="korean" type="text" placeholder="…에 근거하여, …을 바탕으로" />
-					</label> 
-					<label> 
-						예문 
+					</label>
+					<label>
+						Meaning (Korean)
+						<input id="korean" type="text" placeholder="based on; grounded in; derived from" />
+					</label>
+					<label>
+						Example Sentence
 						<textarea id="example" placeholder="Based on the data, we should revise the plan."></textarea>
-					</label> 
-					<label> 
-						출처 
-						<input id="source" type="text" placeholder="뉴스 / 영화 / 회의 / 유튜브 등" />
+					</label>
+					<label>
+						Source
+						<input id="source" type="text" placeholder="News / Movie / Meeting / YouTube, etc." />
 					</label>
 					<div class="actions">
-						<button class="btn primary" id="btn-save-new-word" type="button" style="width: 100%; margin-top: 5px;">추가</button>
+						<button
+							class="btn primary"
+							id="btn-save-new-word"
+							type="button"
+							style="width: 100%; margin-top: 5px;"
+						>
+							Add
+						</button>
 					</div>
 				</div>
 			</div>
@@ -110,72 +128,81 @@
 	</button>
 
 	<!-- Word detail modal -->
-	<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="단어 상세">
+	<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Word Details">
 		<div class="modal-card">
 			<div class="modal-h">
 				<div class="title">
-					<strong id="mEnglish">word</strong> <span id="mRegistrationDate">meta</span>
+					<strong id="mEnglish">word</strong>
+					<span id="mRegistrationDate">meta</span>
 				</div>
 			</div>
-
+	
 			<div class="modal-b">
 				<div id="detailView" style="display: flex; flex-direction: column; gap: 10px;">
 					<div class="kv">
-						<div class="k">한글 뜻</div>
+						<div class="k">Meaning (Korean)</div>
 						<div class="v" id="mKorean"></div>
 					</div>
 					<div class="kv">
-						<div class="k">예문</div>
+						<div class="k">Example Sentence</div>
 						<div class="v" id="mExample"></div>
 					</div>
 					<div class="kv">
-						<div class="k">출처</div>
+						<div class="k">Source</div>
 						<div class="v" id="mSource"></div>
 					</div>
-
+	
 					<div class="modal-actions">
-						<button class="btn" id="btn-open-edit" type="button">수정하기</button>
-						<button class="btn" id="btn-delete" type="button">삭제</button>
-						<button class="close" id="btn-close-edit" type="button">닫기</button>
+						<button class="btn" id="btn-open-edit" type="button">Edit</button>
+						<button class="btn" id="btn-delete" type="button">Delete</button>
+						<button class="close" id="btn-close-edit" type="button">Close</button>
 					</div>
 				</div>
-
+	
 				<div id="detailEdit" style="display: none;">
 					<div class="edit-grid">
 						<div class="kv edit">
-							<div class="k">영어 단어</div>
+							<div class="k">English Word</div>
 							<div class="v">
-								<input type="text" id="eEnglish" placeholder="예: based on" />
+								<input type="text" id="eEnglish" placeholder="e.g. based on" />
 							</div>
 						</div>
-
+	
 						<div class="kv edit">
-							<div class="k">한글 뜻</div>
+							<div class="k">Meaning (Korean)</div>
 							<div class="v">
-								<input type="text" id="eKorean"
-									placeholder="예: …에 근거하여, …을 바탕으로" />
+								<input
+									type="text"
+									id="eKorean"
+									placeholder="e.g. based on; grounded in; derived from"
+								/>
 							</div>
 						</div>
-
+	
 						<div class="kv edit">
-							<div class="k">예문</div>
+							<div class="k">Example Sentence</div>
 							<div class="v">
-								<textarea id="eExample"
-									placeholder="예: Based on the data, we should revise the plan."></textarea>
+								<textarea
+									id="eExample"
+									placeholder="e.g. Based on the data, we should revise the plan."
+								></textarea>
 							</div>
 						</div>
-
+	
 						<div class="kv edit">
-							<div class="k">출처</div>
+							<div class="k">Source</div>
 							<div class="v">
-								<input type="text" id="eSource"
-									placeholder="예: 뉴스 / 영화 / 회의 / 유튜브 등" />
+								<input
+									type="text"
+									id="eSource"
+									placeholder="e.g. News / Movie / Meeting / YouTube"
+								/>
 							</div>
 						</div>
-
+	
 						<div class="modal-actions">
-							<button class="btn primary" id="btn-edit" type="button">저장</button>
-							<button class="btn" id="btnEditCancel" type="button">취소</button>
+							<button class="btn primary" id="btn-edit" type="button">Save</button>
+							<button class="btn" id="btnEditCancel" type="button">Cancel</button>
 						</div>
 					</div>
 				</div>
@@ -183,41 +210,71 @@
 		</div>
 	</div>
 
+
 	<!-- Add word modal (mobile flow) -->
-	<div class="modal" id="modal-new-word" role="dialog" aria-modal="true"
-		aria-label="신규 단어 등록">
+	<div
+		class="modal"
+		id="modal-new-word"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Add New Word"
+	>
 		<div class="modal-card">
 			<div class="modal-h">
 				<div class="title">
-					<strong>단어 등록</strong>
+					<strong>Add New Word</strong>
 				</div>
 			</div>
 			<div class="modal-b">
 				<div class="form">
 					<label>
-						영어 단어 
+						English Word
 						<input id="english-m" type="text" placeholder="based on" />
-					</label> 
-					<label> 
-						한글 뜻 
-						<input id="korean-m" type="text" placeholder="…에 근거하여, …을 바탕으로" />
-					</label> 
-					<label> 
-						예문 
-						<textarea id="example-m" placeholder="Based on the data, we should revise the plan."></textarea>
-					</label> 
-					<label> 
-						출처 
-						<input id="source-m" type="text" placeholder="뉴스 / 영화 / 회의 / 유튜브 등" />
+					</label>
+					<label>
+						Meaning (Korean)
+						<input
+							id="korean-m"
+							type="text"
+							placeholder="based on; grounded in; derived from"
+						/>
+					</label>
+					<label>
+						Example Sentence
+						<textarea
+							id="example-m"
+							placeholder="Based on the data, we should revise the plan."
+						></textarea>
+					</label>
+					<label>
+						Source
+						<input
+							id="source-m"
+							type="text"
+							placeholder="News / Movie / Meeting / YouTube"
+						/>
 					</label>
 					<div class="actions">
-						<button class="btn primary" id="btn-save-new-word-m" type="button">추가</button>
-						<button class="close" id="btn-close-new-word-m" type="button">닫기</button>
+						<button
+							class="btn primary"
+							id="btn-save-new-word-m"
+							type="button"
+						>
+							Add
+						</button>
+						<button
+							class="close"
+							id="btn-close-new-word-m"
+							type="button"
+						>
+							Close
+						</button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 	
 <script>
 	let words = [];
@@ -271,21 +328,24 @@
 	    	}
 	    	
 	    	// validation
-	    	if(isEmpty(data.english)){
-	    		alert('영어 단어를 입력하세요.'); return
+	    	if (isEmpty(data.english)) {
+	    	    alert('Please enter an English word.');
+	    	    return;
 	    	}
-	    	if(isEmpty(data.korean)){
-	    		alert('한글 뜻을 입력하세요.'); return
+
+	    	if (isEmpty(data.korean)) {
+	    	    alert('Please enter the meaning in Korean.');
+	    	    return;
 	    	}
 	    	
 	    	// existence check
 	        let flagExistence = words.some(function(word){
 				return String(word.english || '').toLowerCase() === String(data.english).toLowerCase();
 			});
-			if(flagExistence){
-				let ok = confirm('같은 단어가 이미 존재합니다. 그래도 추가할까요?');
-				if(!ok) return false;
-			}
+	        if (flagExistence) {
+	            let ok = confirm('This word already exists. Do you want to add it anyway?');
+	            if (!ok) return false;
+	        }
 			
 			// send data 
 			$.ajax({
@@ -301,17 +361,31 @@
 							, korean			: response.korean
 							, example			: response.example
 							, source			: response.source
-							, registrationDate	: Date.now()
+							, registrationDate	: formatDateFromNow()
 				        });
 						render();
 						fnRefreshSourceOption();
 						fnResetNewWordForm();
+						
+						if(!IS_DESKTOP){
+							fnCloseNewWordModal()
+						}
 					}else{
 						alert(response.resultMessage);
 					}
 				}
 			});
 		}
+	    
+	    function formatDateFromNow() {
+	    	  var d = new Date(Date.now());
+
+	    	  var yyyy = d.getFullYear();
+	    	  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+	    	  var dd = ('0' + d.getDate()).slice(-2);
+
+	    	  return yyyy + '. ' + mm + '. ' + dd;
+	    	}
 	    
 		function fnResetNewWordForm(){
 			$("#english, #korean, #example, #source").val('');
@@ -364,7 +438,9 @@
 	        $("#statText").text(total + " items · page " + state.page + "/" + totalPages);
 
 			if(pageItems.length === 0){
-				$("#list").html('<div class="hint">조건에 맞는 결과가 없습니다. 검색어/필터를 조정하세요.</div>');
+				$("#list").html(
+					    '<div class="hint">No results match your criteria. Please adjust your search or filters.</div>'
+					);
 			}else{
 	        	let html = '';
 				for(let i = 0; i < pageItems.length; i++){
@@ -379,8 +455,11 @@
 		             	+     	'</div>'
 		            	+     	'<div class="example">' + fnEscapeHtml(w.example) + '</div>'
 		              	+     	'<div class="source">'
-		              	+       	'<span class="chip">' + fnEscapeHtml(w.registrationDate) + '</span>'
-		              	+       	'<span class="chip">' + fnEscapeHtml(w.source) + '</span>'
+		              	+       	'<span class="chip">' + fnEscapeHtml(w.registrationDate) + '</span>';
+	              	if(isNotEmpty(fnEscapeHtml(w.source))){
+	              		html += '<span class="chip">' + fnEscapeHtml(w.source) + '</span>';
+	              	}
+	              	html += ''
 		              	+     	'</div>'
 		              	+   '</div>'
 		              	+ '</div>';
@@ -437,7 +516,7 @@
   			state.advancedOpen = !!open;
   			$("#advancedWrap").toggleClass("open", state.advancedOpen);
   			$("#btnToggleAdvanced").attr("aria-expanded", String(state.advancedOpen));
-  			$("#advancedBtnText").text(state.advancedOpen ? "접기" : "펼치기");
+  			$("#advancedBtnText").text(state.advancedOpen ? "Hide" : "Show");
   	    }
 	    
 		/* filter - source */
@@ -451,7 +530,7 @@
 	            , contentType	: 'application/json'
 				, success		: function(response){
 					if(response.resultCode == 1){
-						let html		= '<option value="">전체</option>';
+						let html		= '<option value="">All</option>';
 						let sourceList 	= response.sourceList;
 						$.each(sourceList, function(index, item){
 							html += '<option value="' + fnEscapeHtml(item.source) + '">' + fnEscapeHtml(item.source) + '</option>';
@@ -508,7 +587,7 @@
 		
 	    function fnSetWordDataIntoDetailAndEditModal(w){
   	      	$("#mEnglish").text(w.english);
-  	      	$("#mRegistrationDate").text("추가일 : " + w.registrationDate);
+	  		$("#mRegistrationDate").text("Added on: " + w.registrationDate);
   	      	$("#mKorean").text(w.korean);
   	      	$("#mExample").text(w.example);
   	      	$("#mSource").text(w.source);
@@ -541,7 +620,8 @@
 	    $("#btn-close-edit").on("click", closeDetailModal);
 	    
 	    function closeDetailModal(){
-  			$("#modal").removeClass("open");
+	    	$('body').toggleClass('modal-open');
+	    	$("#modal").removeClass("open");
   	      	detailState.currentId = null;
   	      	fnSetDetailMode(false);
   	      	syncBodyModalState();
@@ -563,12 +643,15 @@
 	    	}
 	    	
 	    	// validation
-	    	if(isEmpty(data.english)){
-	    		alert('영어 단어를 입력하세요.'); return
-	    	}
-	    	if(isEmpty(data.korean)){
-	    		alert('한글 뜻을 입력하세요.'); return
-	    	}
+			if (isEmpty(data.english)) {
+			    alert('Please enter an English word.');
+			    return;
+			}
+			
+			if (isEmpty(data.korean)) {
+			    alert('Please enter the meaning in Korean.');
+			    return;
+			}
 
   	      	let newWordLower = data.english.toLowerCase();
   	      	let oldWordLower = String(w.english || "").toLowerCase();
@@ -580,7 +663,7 @@
   	          			return String(x.english || "").toLowerCase() === newWordLower;
   	        		});
   	        	if(exists){
-  	          		let ok = confirm("같은 단어가 이미 존재합니다. 그래도 저장할까요?");
+  	        		let ok = confirm('This word already exists. Do you want to save it anyway?');
   	          		if(!ok) return;
   	        	}
   	      	}
@@ -611,7 +694,7 @@
 	    
 	    /* delete word */
 		$('#btn-delete').on("click", () => {
-			if(confirm('단어를 삭제하시겠습니까?')){
+			if(confirm('Are you sure you want to delete this word?')){
 				// send data 
 				$.ajax({
 		            type			: 'post'
@@ -635,50 +718,6 @@
 		//---------------------------------------------------
 
 
-	    	    var MOBILE_BREAKPOINT = 980;
-	    	    var mq = window.matchMedia("(max-width: " + MOBILE_BREAKPOINT + "px)");
-
-	    	    function uniq(arr){
-	    	      var set = {};
-	    	      var out = [];
-	    	      for (var i=0;i<arr.length;i++){
-	    	        var v = arr[i];
-	    	        if(!v) continue;
-	    	        if(!set[v]){
-	    	          set[v] = true;
-	    	          out.push(v);
-	    	        }
-	    	      }
-	    	      return out;
-	    	    }
-
-	    	    function setAddFormMobile(values){
-	    	      $("#mAddWord").val(values && values.word ? values.word : "");
-	    	      $("#mAddMeaning").val(values && values.meaning ? values.meaning : "");
-	    	      $("#mAddExample").val(values && values.example ? values.example : "");
-	    	      $("#mAddSource").val(values && values.source ? values.source : "");
-	    	    }
-
-
-
-	    	    function isDrawerVisible(){
-	    	      return $("#drawer").hasClass("open") || $("#drawer").hasClass("closing");
-	    	    }
-
-	    	    function updateFabVisibility(){
-	    	      var isMobile = mq.matches;
-	    	      var anyOverlayOpen =
-	    	        $("#modal").hasClass("open") ||
-	    	        $("#modal-new-word").hasClass("open") ||
-	    	        isDrawerVisible();
-
-	    	      if(!isMobile){
-	    	        $("#btn-floating").prop("hidden", true);
-	    	        return;
-	    	      }
-	    	      $("#btn-floating").prop("hidden", anyOverlayOpen);
-	    	    }
-
 	    	    function syncBodyModalState(){
 	    	      var anyOpen =
 	    	        $("#modal").hasClass("open") ||
@@ -687,22 +726,6 @@
 	    	      $("body").toggleClass("modal-open", anyOpen);
 	    	      //updateFabVisibility();
 	    	    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	    	    function validateEditPayload(payload){
 	    	      var word = $.trim(payload.word || "");
@@ -729,7 +752,6 @@
 	    	//----------
 	    	
 	    	      render();
-	    	      syncBodyModalState();
 
 	    	      // background click disabled intentionally
 	    	      $("#drawerBackdrop").on("click", function(){ /* no-op */ });
@@ -746,25 +768,10 @@
 	    	        }, 0);
 	    	      });
 
-	    	     
-
-
-
-
 	    	      $("#btnEditCancel").on("click", function(){
 	    	        var w2 = detailState.currentId ? fnFindWordById(detailState.currentId) : null;
 	    	        fnSetDetailMode(false);
 	    	      });
-	    	      
-
-	    	      
-	    	      $("#btnClearAdd").on("click", function(){
-	    	        setAddFormDesktop({});
-	    	        $("#englsih").trigger("focus");
-	    	      });
-
-
-		
 	})
  </script>	
 </c:set>

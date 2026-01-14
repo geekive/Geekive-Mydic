@@ -93,4 +93,9 @@ public class VocabularyController {
 		}
 		return gMap;
 	}
+	
+	@GetMapping(value = "/quiz")
+	public String quizGet() throws Exception{
+		return "vocabulary/quiz";
+	}
 }

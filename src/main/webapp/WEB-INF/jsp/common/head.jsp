@@ -4,17 +4,17 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 	<meta property="og:url" content="https://mydic.geekive.com">
-    <meta property="og:title" content="Geekive Mydic">
+    <meta property="og:title" content="Mydic">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://mydic.geekive.com/storage/image/common/meta_logo.png">
-    <meta property="og:description" content="My DICtionaty. Geekive's Mydic.">
+    <meta property="og:image" content="<c:url value="/image/meta_logo.png"/>">
+    <meta property="og:description" content="My DICtionaty. Mydic.">
     
     <link rel="icon" href="<c:url value="/image/favicon.ico"/>">
     <link rel="apple-touch-icon" href="<c:url value="/image/favicon.ico"/>">
     
-	<title>Geekive's Mydic</title>
+	<title>Mydic</title>
 
 	<link rel="stylesheet" type="text/css" href="<c:url value="/css/style.css"/>"/>
 	
