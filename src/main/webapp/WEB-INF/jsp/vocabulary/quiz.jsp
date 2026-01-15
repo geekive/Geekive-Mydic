@@ -10,9 +10,15 @@
             <div class="quiz-title">
               <h2 style="padding-bottom: 10px;">Quiz</h2>
             </div>
-            <div class="quiz-stat" id="quizStat">
-              <span class="dot" aria-hidden="true"></span>
-              <span id="statText">1 / 1</span>
+
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+              <button type="button" class="btn" id="btnSwap" aria-label="Switch quiz direction" style="border-radius:999px; padding:10px 12px;">
+                KR → EN
+              </button>
+              <div class="quiz-stat" id="quizStat">
+                <span class="dot" aria-hidden="true"></span>
+                <span id="statText">1 / 1</span>
+              </div>
             </div>
           </div>
 
@@ -27,11 +33,11 @@
 			  </svg>
 			  Previous
 			</button>
-			
+
 			<button type="button" class="btn primary control-btn" id="btnToggleAnswer" aria-label="Show answer">
 			  Show Answer
 			</button>
-			
+
 			<button type="button" class="btn control-btn" id="btnNext" aria-label="Next word">
 			  Next
 			  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -42,6 +48,7 @@
         </div>
       </section>
     </main>
+
   <script>
     $(function () {
 
@@ -82,24 +89,8 @@
       /* =========================
          UI helpers
       ========================= */
-      function formatDate(ts) {
-        var d = new Date(ts);
-        if (isNaN(d.getTime())) return String(ts || "");
-        var yyyy = d.getFullYear();
-        var mm = String(d.getMonth() + 1).padStart(2, "0");
-        var dd = String(d.getDate()).padStart(2, "0");
-        var hh = String(d.getHours()).padStart(2, "0");
-        var mi = String(d.getMinutes()).padStart(2, "0");
-        return yyyy + "-" + mm + "-" + dd + " " + hh + ":" + mi;
-      }
-
-      function todayLabel() {
-        var d = new Date();
-        return d.getFullYear() + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0");
-      }
-
       function escapeHtml(str) {
-        return String(str)
+        return String(str == null ? "" : str)
           .replaceAll("&", "&amp;")
           .replaceAll("<", "&lt;")
           .replaceAll(">", "&gt;")
@@ -110,11 +101,17 @@
       /* =========================
          Quiz logic (words 로드 이후 초기화)
       ========================= */
-      var state = { idx: 0, revealed: false };
+      var state = {
+        idx: 0,
+        revealed: false,
+        mode: "EN_TO_KR" // EN_TO_KR: 영어 보여주고 한글 맞추기 / KR_TO_EN: 한글 보여주고 영어 맞추기
+      };
 
       var $track = $("#track");
       var $frame = $("#quizFrame");
       var $statText = $("#statText");
+      var $btnSwap = $("#btnSwap");
+      var $btnToggleAnswer = $("#btnToggleAnswer");
 
       function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
@@ -132,48 +129,78 @@
         $track.css("transform", "translate3d(" + px + "px,0,0)");
       }
 
+      function getPromptText(w) {
+        if (state.mode === "KR_TO_EN") return escapeHtml(w.korean);
+        return escapeHtml(w.english);
+      }
+
+      function getAnswerText(w) {
+        if (state.mode === "KR_TO_EN") return escapeHtml(w.english);
+        return escapeHtml(w.korean);
+      }
+
+      function getExampleText(w) {
+        return escapeHtml(w.example || "");
+      }
+
+      function getAnswerLabel() {
+        return state.mode === "KR_TO_EN" ? "Answer (English)" : "Answer (Korean Meaning)";
+      }
+
+      function getSwapButtonText() {
+        return state.mode === "KR_TO_EN" ? "EN → KR" : "KR → EN";
+      }
+
+      function getToggleButtonText() {
+        return state.revealed ? "Hide Answer" : "Show Answer";
+      }
+
       function renderSlides() {
         if (!words.length) {
-        	$track.html(
-        			  '<div class="slide" data-idx="0">' +
-        			    '<div class="card" role="group" aria-label="No Data">' +
-        			      '<div class="word-box">' +
-        			        '<p class="word-eng">No Words</p>' +
-        			        '<p class="word-sub">There are no registered words. Please add a word and try again.</p>' +
-        			      '</div>' +
-        			    '</div>' +
-        			  '</div>'
-        			);
+          $track.html(
+            '<div class="slide" data-idx="0">' +
+              '<div class="card" role="group" aria-label="No Data">' +
+                '<div class="word-box">' +
+                  '<p class="word-eng">No Words</p>' +
+                  '<p class="word-sub">There are no registered words. Please add a word and try again.</p>' +
+                '</div>' +
+              '</div>' +
+            '</div>'
+          );
           return;
         }
 
         var html = "";
         for (var i = 0; i < words.length; i++) {
           var w = words[i];
+
           html += ''
             + '<div class="slide" data-idx="' + i + '">'
             + '  <div class="card" role="group" aria-label="단어 카드 ' + (i + 1) + '">'
             + '    <div class="card-top">'
             + '      <div class="chips">';
-        	if(isNotEmpty(escapeHtml(w.source))){
-          		html += '<span class="chip">' + escapeHtml(w.source) + '</span>';
-          	}
-        	html += ''
+
+          if (typeof isNotEmpty === "function" && isNotEmpty(escapeHtml(w.source))) {
+            html += '<span class="chip">' + escapeHtml(w.source) + '</span>';
+          } else if (escapeHtml(w.source)) {
+            html += '<span class="chip">' + escapeHtml(w.source) + '</span>';
+          }
+
+          html += ''
             + '        <span class="chip">Added : ' + escapeHtml(w.registrationDate) + '</span>'
             + '      </div>'
-            /* + '      <span class="chip">' + escapeHtml((i + 1) + " / " + words.length) + '</span>' */
             + '    </div>'
-            + '    <div class="word-box" aria-label="영어 단어">'
-            + '      <p class="word-eng">' + escapeHtml(w.english) + '</p>'
+            + '    <div class="word-box" aria-label="문제">'
+            + '      <p class="word-eng" data-role="prompt">' + getPromptText(w) + '</p>'
             + '    </div>'
             + '    <div class="answer-area" aria-label="정답 영역">'
             + '      <div class="answer-row">'
             + '        <div class="answer-label">'
-            + '          <strong>Answer (Korean Meaning)</strong>'
+            + '          <strong data-role="answerLabel">' + escapeHtml(getAnswerLabel()) + '</strong>'
             + '        </div>'
             + '      </div>'
-            + '      <div class="answer hidden" data-role="answer">' + escapeHtml(w.korean) + '</div>'
-            + '      <div class="answer-example hidden" data-role="example">' + escapeHtml(w.example || "") + '</div>'
+            + '      <div class="answer hidden" data-role="answer">' + getAnswerText(w) + '</div>'
+            + '      <div class="answer-example hidden" data-role="example">' + getExampleText(w) + '</div>'
             + '    </div>'
             + '  </div>'
             + '</div>';
@@ -186,9 +213,12 @@
 
         $("#btnPrev").prop("disabled", !words.length || state.idx <= 0);
         $("#btnNext").prop("disabled", !words.length || state.idx >= maxIdx);
-        $("#btnToggleAnswer").prop("disabled", !words.length);
+        $btnToggleAnswer.prop("disabled", !words.length);
+        $btnSwap.prop("disabled", !words.length);
 
         $statText.text(words.length ? ((state.idx + 1) + " / " + words.length) : "0 / 0");
+        $btnSwap.text(getSwapButtonText());
+        $btnToggleAnswer.text(getToggleButtonText());
       }
 
       function updateView() {
@@ -196,23 +226,27 @@
         $track.find('[data-role="example"]').addClass("hidden");
 
         if (!words.length) {
-          $("#btnToggleAnswer").text("Show Answer");
+          $btnToggleAnswer.text("Show Answer");
+          $btnSwap.text(getSwapButtonText());
           return;
         }
 
         var $currentSlide = $track.find('.slide[data-idx="' + state.idx + '"]');
         if (!$currentSlide.length) return;
 
-        var $ans = $currentSlide.find('[data-role="answer"]');
-        var $ex = $currentSlide.find('[data-role="example"]');
+        var w = words[state.idx];
+
+        $currentSlide.find('[data-role="prompt"]').html(getPromptText(w));
+        $currentSlide.find('[data-role="answerLabel"]').text(getAnswerLabel());
+        $currentSlide.find('[data-role="answer"]').html(getAnswerText(w));
+        $currentSlide.find('[data-role="example"]').html(getExampleText(w));
 
         if (state.revealed) {
-        	  $ans.removeClass("hidden");
-        	  $ex.removeClass("hidden");
-        	  $("#btnToggleAnswer").text("Hide Answer");
-        	} else {
-        	  $("#btnToggleAnswer").text("Show Answer");
-        	}
+          $currentSlide.find('[data-role="answer"]').removeClass("hidden");
+          $currentSlide.find('[data-role="example"]').removeClass("hidden");
+        }
+
+        updateButtons();
       }
 
       function setIndex(nextIdx, opts) {
@@ -223,7 +257,6 @@
         if (!opts.keepAnswer) state.revealed = false;
 
         updateView();
-        updateButtons();
         setTrackX(currentBaseX(), true);
       }
 
@@ -356,8 +389,16 @@
           setIndex(state.idx + 1);
         });
 
-        $("#btnToggleAnswer").off("click.quiz").on("click.quiz", function () {
+        $btnToggleAnswer.off("click.quiz").on("click.quiz", function () {
+          if (!words.length) return;
           state.revealed = !state.revealed;
+          updateView();
+        });
+
+        $btnSwap.off("click.quiz").on("click.quiz", function () {
+          if (!words.length) return;
+          state.mode = (state.mode === "EN_TO_KR") ? "KR_TO_EN" : "EN_TO_KR";
+          state.revealed = false;
           updateView();
         });
 
@@ -377,6 +418,7 @@
         $(window).off("resize.quiz").on("resize.quiz", function () {
           setIndex(state.idx, { keepAnswer: true });
           updateView();
+          setTrackX(currentBaseX(), true);
         });
       }
 
@@ -432,26 +474,29 @@
 
         renderSlides();
         bindQuizEventsOnce();
-        setIndex(0);
-        updateView();
-      }
-         
-         function shuffleWords(list) {
-        	  var a = (list || []).slice(); // 원본 보존 (원본을 섞어도 되면 slice() 제거 가능)
-        	  for (var i = a.length - 1; i > 0; i--) {
-        	    var j = Math.floor(Math.random() * (i + 1));
-        	    var tmp = a[i];
-        	    a[i] = a[j];
-        	    a[j] = tmp;
-        	  }
-        	  return a;
-        	}
 
+        requestAnimationFrame(function(){
+          setIndex(0);
+          updateView();
+          setTrackX(currentBaseX(), true);
+        });
+      }
+
+      function shuffleWords(list) {
+        var a = (list || []).slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+        }
+        return a;
+      }
 
       fetchWords()
         .then(function (list) {
-            var shuffled = shuffleWords(list);
-            initQuizWithWords(shuffled);
+          var shuffled = shuffleWords(list);
+          initQuizWithWords(shuffled);
         })
         .fail(function (msg) {
           alert(msg);
