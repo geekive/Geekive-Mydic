@@ -15,6 +15,12 @@
               <button type="button" class="btn" id="btnSwap" aria-label="Switch quiz direction" style="border-radius:999px; padding:10px 12px;">
                 KR → EN
               </button>
+
+              <!-- NEW: Shuffle button (randomize only when clicked) -->
+              <button type="button" class="btn" id="btnShuffle" aria-label="Shuffle words" style="border-radius:999px; padding:10px 12px;">
+                Shuffle
+              </button>
+
               <div class="quiz-stat" id="quizStat">
                 <span class="dot" aria-hidden="true"></span>
                 <span id="statText">1 / 1</span>
@@ -54,8 +60,11 @@
 
       /* =========================
          Words (AJAX로 채움)
+         - 최초 로드는 서버 응답 순서 그대로 표시
+         - Shuffle 버튼을 눌렀을 때만 랜덤 섞기
       ========================= */
       var words = [];
+      var originalWords = []; // NEW: server order preserved
 
       function normalizeWordsFromResponse(vocaList) {
         var out = [];
@@ -111,6 +120,7 @@
       var $frame = $("#quizFrame");
       var $statText = $("#statText");
       var $btnSwap = $("#btnSwap");
+      var $btnShuffle = $("#btnShuffle"); // NEW
       var $btnToggleAnswer = $("#btnToggleAnswer");
 
       function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
@@ -215,6 +225,7 @@
         $("#btnNext").prop("disabled", !words.length || state.idx >= maxIdx);
         $btnToggleAnswer.prop("disabled", !words.length);
         $btnSwap.prop("disabled", !words.length);
+        $btnShuffle.prop("disabled", !words.length); // NEW
 
         $statText.text(words.length ? ((state.idx + 1) + " / " + words.length) : "0 / 0");
         $btnSwap.text(getSwapButtonText());
@@ -258,6 +269,34 @@
 
         updateView();
         setTrackX(currentBaseX(), true);
+      }
+
+      /* =========================
+         Shuffle (only on button click)
+      ========================= */
+      function shuffleWords(list) {
+        var a = (list || []).slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+        }
+        return a;
+      }
+
+      function applyWordsAndRebuild(nextWords) {
+        words = nextWords || [];
+        state.idx = 0;
+        state.revealed = false;
+
+        renderSlides();
+
+        requestAnimationFrame(function () {
+          setIndex(0);
+          updateView();
+          setTrackX(currentBaseX(), true);
+        });
       }
 
       /* =========================
@@ -402,6 +441,17 @@
           updateView();
         });
 
+        // NEW: Shuffle button
+        $btnShuffle.off("click.quiz").on("click.quiz", function () {
+          if (!words.length) return;
+
+          // shuffle only when clicked; keep originalWords as source-of-truth in server order
+          var shuffled = shuffleWords(originalWords);
+
+          // apply shuffled list to quiz (rebuild slides safely)
+          applyWordsAndRebuild(shuffled);
+        });
+
         $frame.off(".quizSwipe");
         $frame.on("pointerdown.quizSwipe", function (ev) {
           if (ev.pointerType === "mouse" && ev.button !== 0) return;
@@ -466,9 +516,12 @@
 
       /* =========================
          init flow: AJAX -> init quiz
+         - 최초 로드: 서버 응답 순서 그대로
       ========================= */
       function initQuizWithWords(list) {
-        words = list || [];
+        originalWords = (list || []).slice(); // NEW: preserve server order
+        words = originalWords.slice();        // initial display = server order
+
         state.idx = 0;
         state.revealed = false;
 
@@ -482,21 +535,10 @@
         });
       }
 
-      function shuffleWords(list) {
-        var a = (list || []).slice();
-        for (var i = a.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = a[i];
-          a[i] = a[j];
-          a[j] = tmp;
-        }
-        return a;
-      }
-
       fetchWords()
         .then(function (list) {
-          var shuffled = shuffleWords(list);
-          initQuizWithWords(shuffled);
+          // IMPORTANT: no shuffle on initial load
+          initQuizWithWords(list);
         })
         .fail(function (msg) {
           alert(msg);

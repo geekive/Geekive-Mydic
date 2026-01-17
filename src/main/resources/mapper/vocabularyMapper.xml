@@ -19,7 +19,6 @@
 		LIMIT 1
 	</select>
 	
-	
 	<select id="selectVocabularyList" resultType="geekiveMap">
 		/* vocabularyMapper.selectVocabularyList */
 		SELECT
