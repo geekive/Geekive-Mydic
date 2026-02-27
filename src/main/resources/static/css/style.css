@@ -1042,7 +1042,7 @@ input::placeholder, textarea::placeholder {
 @media (max-width: 520px) {
 	.today { padding: 14px 12px; }
 	.today-word { font-size: 22px; }
-	.hero-sub { font-size: 13px; }
+	hero-sub { font-size: 13px; }
 	#btn-code{
 		font-size: 6pt;
 	}
@@ -1060,6 +1060,110 @@ input::placeholder, textarea::placeholder {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
+}
+
+/* =========================================================
+   Remember me (custom checkbox, FIX)
+   - 체크박스: 왼쪽 정렬 (label padding-left 방식)
+   - V 체크표시: 박스 안에 정확히 들어오게 (absolute 기준점 고정)
+========================================================= */
+
+.remember-row{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+/* native checkbox 숨김(접근성 유지) */
+.remember-row input[type="checkbox"]{
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* label이 레이아웃을 잡는다: 왼쪽에 박스, 오른쪽에 텍스트 */
+.remember-row label{
+	position: relative;         /* ★ ::before/::after 기준점 */
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	user-select: none;
+
+	padding-left: 26px;         /* ★ 박스 공간 확보 (왼쪽 정렬) */
+	min-height: 18px;
+
+	color: rgba(255,255,255,.80);
+	font-size: 13px;
+	letter-spacing: .15px;
+	line-height: 1.35;
+}
+
+/* 체크박스 박스: label의 왼쪽에 고정 */
+.remember-row label::before{
+	content: "";
+	position: absolute;
+	left: 0;                    /* ★ 왼쪽 정렬 */
+	top: 50%;
+	transform: translateY(-50%);
+	width: 18px;
+	height: 18px;
+
+	border-radius: 6px;
+	border: 1.5px solid rgba(255,255,255,.18);
+	background: rgba(255,255,255,.03);
+	box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+	transition: background-color .15s ease, border-color .15s ease, transform .06s ease;
+}
+
+/* ✔ 체크표시: 박스 안에 정확히 */
+.remember-row label::after{
+	content: "";
+	position: absolute;
+
+	/* 박스(18x18) 기준으로 안쪽 위치 */
+	left: 6px;
+	top: 50%;
+	transform: translateY(-58%) rotate(45deg);
+
+	width: 6px;
+	height: 10px;
+
+	border-right: 2.6px solid rgba(255,255,255,.98);
+	border-bottom: 2.6px solid rgba(255,255,255,.98);
+
+	opacity: 0;
+	transition: opacity .12s ease;
+}
+
+/* 체크 상태 */
+.remember-row input[type="checkbox"]:checked + label::before{
+	background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(167,139,250,.90));
+	border-color: rgba(96,165,250,.55);
+}
+
+.remember-row input[type="checkbox"]:checked + label::after{
+	opacity: 1;
+}
+
+/* hover */
+.remember-row label:hover::before{
+	border-color: rgba(96,165,250,.55);
+	background: rgba(255,255,255,.05);
+}
+
+/* active */
+.remember-row label:active::before{
+	transform: translateY(-50%) scale(0.98);
+}
+
+/* focus */
+.remember-row input[type="checkbox"]:focus-visible + label::before{
+	outline: 2px solid rgba(96,165,250,.35);
+	outline-offset: 3px;
 }
 
 /* =========================

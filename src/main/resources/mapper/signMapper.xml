@@ -46,4 +46,56 @@
 			EMAIL 				= #{email}
 			AND FLAG_DELETED 	= 'N'
 	</select>
+
+	<update id="upsertAutologinToken" parameterType="geekiveMap">
+		/* signMapper.upsertAutologinToken */
+		INSERT INTO AUTOLOGIN (
+			USER_UID
+		  	, TOKEN_HASH
+		  	, EXPIRES_AT_EPOCH
+		  	, UA
+		  	, IP
+		  	, REGISTRATION_DATE
+		  	, UPDATED_DATE
+		)
+		VALUES (
+		    #{userUid}
+			, #{tokenHash}
+			, #{expiresAtEpoch}
+			, #{ua}
+			, #{ip}
+			, NOW()
+			, NOW()
+		)
+		ON DUPLICATE KEY UPDATE
+			TOKEN_HASH        	= VALUES(TOKEN_HASH)
+			, EXPIRES_AT_EPOCH  = VALUES(EXPIRES_AT_EPOCH)
+			, UA                = VALUES(UA)
+			, IP                = VALUES(IP)
+			, UPDATED_DATE      = NOW()
+	</update>
+	
+	<delete id="deleteAutologinTokenByUserUid" parameterType="geekiveMap">
+		/* signMapper.deleteAutologinTokenByUserUid */
+		DELETE FROM AUTOLOGIN
+		WHERE 
+			USER_UID = #{userUid}
+	</delete>
+
+	<select id="selectUserByAutologinTokenHash" parameterType="geekiveMap" resultType="geekiveMap">
+		/* signMapper.selectUserByAutologinTokenHash */
+		SELECT 
+			U.USER_UID		AS userUid
+			, U.PASSWORD	AS password
+			, U.NAME		AS name
+		FROM 
+			AUTOLOGIN A
+		INNER JOIN USER U
+	  	ON 
+	  		A.USER_UID 				= U.USER_UID
+		WHERE 
+			A.TOKEN_HASH 			= #{tokenHash}
+	  		AND A.EXPIRES_AT_EPOCH 	>= #{nowEpoch}
+		LIMIT 1
+	</select>
 </mapper>

@@ -90,6 +90,12 @@
 			<form id="loginForm" class="auth-form" autocomplete="on">
 				<label> E-mail <input id="signin-email" type="text" inputmode="email" autocomplete="off"  placeholder="example@domain.com"></label>
 				<label> Password <input id="signin-password" type="password" autocomplete="off" placeholder="********"></label>
+				
+				<div class="remember-row">
+					<input id="signin-remember" type="checkbox">
+					<label for="signin-remember">Stay signed in for 7 days</label>
+				</div>
+				
 				<div class="modal-actions">
 					<button class="btn primary" id="btn-signin-save" type="submit">Sign in</button>
 					<button class="close" id="btn-signin-close" type="button">Clsoe</button>
@@ -171,6 +177,7 @@
 		
 		let $signinEmail	= $("#signin-email");
 		let $signinPassword	= $("#signin-password");
+		let $signinRemember	= $("#signin-remember");
 		
 		$btnSigninOpen.on('click', fnOpenSigninModal);
 		$btnSigninClose.on("click", fnCloseSigninModal);
@@ -211,8 +218,9 @@
 			}
 
 			let data = {
-					email 		: email
-					, password 	: password
+					email 			: email
+					, password 		: password
+					, rememberMe	: $signinRemember.is(':checked') ? 'Y' : 'N'
 			}
 			
 			$.ajax({
