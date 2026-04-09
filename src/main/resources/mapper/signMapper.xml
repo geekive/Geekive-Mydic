@@ -39,6 +39,7 @@
 		SELECT 
 			USER_UID							AS userUid
 			, PASSWORD							AS password
+			, EMAIL								AS email
 			, NAME								AS name
 		FROM
 			USER

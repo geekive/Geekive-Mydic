@@ -66,7 +66,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		// 2) Authentication enforcement (protected resources only)
 		registry.addInterceptor(loginCheckInterceptor)
 				.order(1)
-				.addPathPatterns("/vocabulary/**");
+				.addPathPatterns("/vocabulary/**", "/myinfo/**");
 	}
 
 	@Override

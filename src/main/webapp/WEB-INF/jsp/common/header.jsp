@@ -68,9 +68,9 @@
 							</div>
 						</button>
 		
-						<button type="button" id="">
+						<button type="button" onclick="goToPage('/myinfo')">
 							<div class="k">
-								<div class="t">My info (Under construction)</div>
+								<div class="t">My info</div>
 							</div>
 						</button>
 					</c:when>

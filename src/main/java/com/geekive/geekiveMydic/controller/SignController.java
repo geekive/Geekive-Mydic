@@ -78,9 +78,7 @@ public class SignController {
 				signService.upsertAutologinToken(t);
 
 				AutoLoginTokenUtil.writeAutoLoginCookie(response, tokenPlain);
-
 			} else {
-
 				AutoLoginTokenUtil.clearAutoLoginCookie(response);
 				signService.deleteAutologinTokenByUserUid(userMap);
 			}
